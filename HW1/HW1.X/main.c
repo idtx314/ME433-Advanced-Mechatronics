@@ -65,6 +65,8 @@ int main() {
     while(1) {
     // use _CP0_SET_COUNT(0) and _CP0_GET_COUNT() to test the PIC timing
     // remember the core timer runs at half the 48MHz sysclk, so 24MHz
+        while(!PORTBbits.RB4)
+        {;}
         _CP0_SET_COUNT(0);
         LATAbits.LATA4 = 1; //Turn on LED
         while(_CP0_GET_COUNT() < 12000) //.5ms
@@ -72,14 +74,5 @@ int main() {
         LATAbits.LATA4 = 0; //Turn off LED
         while(_CP0_GET_COUNT() < 24000) //1ms
         {;}
-        
-        /*
-         * if(button is not pressed)
-         * {
-         *   time = CP0_get time()
-         *   LATAINV = 1<<4;    //Toggle LED by Inverting bit 4
-         *   while(CP0_getTime-time < .001 s) // find the period formula and the system clock rate
-         *      {;}
-        */
     }
 }
