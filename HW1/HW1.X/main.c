@@ -54,8 +54,10 @@ int main() {
     DDPCONbits.JTAGEN = 0;
 
     // do your TRIS and LAT commands here
-    //TRIS a4 to digital out
-    //TRIS b4 to digital in
+    //clear ANSELx to 0
+    TRISAbits.TRISA4 = 0;   //TRIS a4 to 0 (pin 12)
+    LATAbits.LATA4 = 1;     //LAT a4 to 1
+    TRISBbits.TRISB4 = 1;   //TRIS b4 to 1 (pin 11)
     __builtin_enable_interrupts();
 
     long int time;
