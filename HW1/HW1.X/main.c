@@ -54,23 +54,32 @@ int main() {
     DDPCONbits.JTAGEN = 0;
 
     // do your TRIS and LAT commands here
-    //clear ANSELx to 0
-    TRISAbits.TRISA4 = 0;   //TRIS a4 to 0 (pin 12)
+    //ANSSELbits do not need to be cleared, these ports do not have analog functions
+    TRISAbits.TRISA4 = 0;   //TRIS a4 to 0 (pin 12) for LED
     LATAbits.LATA4 = 1;     //LAT a4 to 1
-    TRISBbits.TRISB4 = 1;   //TRIS b4 to 1 (pin 11)
+    TRISBbits.TRISB4 = 1;   //TRIS b4 to 1 (pin 11) for button
     __builtin_enable_interrupts();
 
     long int time;
 
     while(1) {
     // use _CP0_SET_COUNT(0) and _CP0_GET_COUNT() to test the PIC timing
-    // remember the core timer runs at half the sysclk
-        /*
-        time = CP0_get time()
-        INV toggle led
-        while(CP0_getTime-time < .001 s) // find the period formula and the system clock rate
+    // remember the core timer runs at half the 48MHz sysclk, so 24MHz
+        _CP0_SET_COUNT(0);
+        LATAbits.LATA4 = 1; //Turn on LED
+        while(_CP0_GET_COUNT() < 12000) //.5ms
         {;}
-
+        LATAbits.LATA4 = 0; //Turn off LED
+        while(_CP0_GET_COUNT() < 24000) //1ms
+        {;}
+        
+        /*
+         * if(button is not pressed)
+         * {
+         *   time = CP0_get time()
+         *   LATAINV = 1<<4;    //Toggle LED by Inverting bit 4
+         *   while(CP0_getTime-time < .001 s) // find the period formula and the system clock rate
+         *      {;}
         */
     }
 }
