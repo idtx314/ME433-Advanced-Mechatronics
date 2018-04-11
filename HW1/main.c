@@ -54,11 +54,21 @@ int main() {
     DDPCONbits.JTAGEN = 0;
 
     // do your TRIS and LAT commands here
-
+    //TRIS a4 to digital out
+    //TRIS b4 to digital in
     __builtin_enable_interrupts();
+
+    long int time;
 
     while(1) {
     // use _CP0_SET_COUNT(0) and _CP0_GET_COUNT() to test the PIC timing
     // remember the core timer runs at half the sysclk
+        /*
+        time = CP0_get time()
+        INV toggle led
+        while(CP0_getTime-time < .001 s) // find the period formula and the system clock rate
+        {;}
+
+        */
     }
 }
