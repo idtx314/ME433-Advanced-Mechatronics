@@ -6,7 +6,7 @@
 <setting alwaysvectorfont="no"/>
 <setting verticaltext="up"/>
 </settings>
-<grid distance="50" unitdist="mil" unit="inch" style="lines" multiple="1" display="no" altdistance="5" altunitdist="mil" altunit="inch"/>
+<grid distance="0.005" unitdist="inch" unit="inch" style="lines" multiple="1" display="no" altdistance="5" altunitdist="mil" altunit="inch"/>
 <layers>
 <layer number="1" name="Top" color="4" fill="1" visible="yes" active="yes"/>
 <layer number="16" name="Bottom" color="1" fill="1" visible="yes" active="yes"/>
@@ -148,6 +148,23 @@
 <wire x1="50" y1="0" x2="50" y2="50" width="0" layer="20"/>
 <wire x1="50" y1="50" x2="0" y2="50" width="0" layer="20"/>
 <wire x1="0" y1="50" x2="0" y2="0" width="0" layer="20"/>
+<text x="4.699" y="45.72" size="0.635" layer="21" rot="R90">MCLR</text>
+<text x="2.54" y="33.528" size="1.27" layer="21">A0</text>
+<text x="2.54" y="30.988" size="1.27" layer="21">A1</text>
+<text x="2.54" y="28.448" size="1.27" layer="21">B2</text>
+<text x="2.54" y="25.908" size="1.27" layer="21">B3</text>
+<text x="2.54" y="23.368" size="1.27" layer="21">B4/USER</text>
+<text x="2.54" y="20.828" size="1.27" layer="21">A4/LED</text>
+<text x="2.54" y="18.288" size="1.27" layer="21">3V3</text>
+<text x="2.413" y="15.748" size="1.016" layer="21">GND</text>
+<text x="43.815" y="15.875" size="1.27" layer="21">GND</text>
+<text x="45.085" y="18.415" size="1.27" layer="21">5V</text>
+<text x="45.085" y="20.955" size="1.27" layer="21">B7</text>
+<text x="45.085" y="23.368" size="1.27" layer="21">B8</text>
+<text x="45.085" y="26.035" size="1.27" layer="21">B9</text>
+<text x="44.069" y="28.575" size="1.27" layer="21">B13</text>
+<text x="43.942" y="31.115" size="1.27" layer="21">B14</text>
+<text x="43.942" y="33.655" size="1.27" layer="21">B15</text>
 </plain>
 <libraries>
 <library name="custom">
@@ -663,7 +680,7 @@ design rules under a new name.</description>
 <attribute name="VALUE" x="4.699" y="4.699" size="1.27" layer="27" ratio="10" rot="R270"/>
 </element>
 <element name="C6" library="custom" package="B45181B" package3d_urn="urn:adsk.eagle:package:25794/1" value="10uF" x="41.91" y="26.67" smashed="yes" rot="R270">
-<attribute name="NAME" x="44.704" y="27.051" size="1.27" layer="25" ratio="10" rot="R270"/>
+<attribute name="NAME" x="37.846" y="30.099" size="1.27" layer="25" ratio="10" rot="R270"/>
 <attribute name="VALUE" x="37.719" y="27.559" size="1.27" layer="27" ratio="10" rot="R270"/>
 </element>
 <element name="J1" library="custom" package="USB-MB-H" value="USB-MB-H" x="46.99" y="6.35" rot="R180"/>
@@ -692,9 +709,9 @@ design rules under a new name.</description>
 <attribute name="NAME" x="17.78" y="43.053" size="0.6096" layer="25" font="vector" ratio="20" rot="R180"/>
 <attribute name="VALUE" x="17.78" y="43.942" size="0.6096" layer="27" font="vector" ratio="20" rot="R180"/>
 </element>
-<element name="U$5" library="custom" package="BUTTON" value="RESET" x="7.62" y="46.99" smashed="yes" rot="R180">
-<attribute name="NAME" x="7.62" y="43.053" size="0.6096" layer="25" font="vector" ratio="20" rot="R180"/>
-<attribute name="VALUE" x="7.62" y="43.942" size="0.6096" layer="27" font="vector" ratio="20" rot="R180"/>
+<element name="U$5" library="custom" package="BUTTON" value="RESET" x="8.89" y="46.99" smashed="yes" rot="R180">
+<attribute name="NAME" x="8.89" y="43.053" size="0.6096" layer="25" font="vector" ratio="20" rot="R180"/>
+<attribute name="VALUE" x="8.89" y="43.942" size="0.6096" layer="27" font="vector" ratio="20" rot="R180"/>
 </element>
 <element name="U$6" library="custom" package="PICKIT3" value="PICKIT3" x="1.27" y="41.91" rot="R270"/>
 <element name="U$8" library="custom" package="OSC" value="8MHz" x="41.91" y="17.78" rot="R270"/>
@@ -921,8 +938,8 @@ design rules under a new name.</description>
 <wire x1="1.27" y1="24.13" x2="13.97" y2="24.13" width="0.254" layer="1"/>
 <wire x1="13.97" y1="24.13" x2="25.4" y2="20.32" width="0.254" layer="1"/>
 <wire x1="13.97" y1="24.13" x2="17.78" y2="29.21" width="0.254" layer="1"/>
-<wire x1="17.78" y1="29.21" x2="10.16" y2="35.56" width="0.254" layer="16"/>
-<wire x1="10.16" y1="35.56" x2="10.16" y2="46.99" width="0.254" layer="16"/>
+<wire x1="17.78" y1="29.21" x2="11.43" y2="35.56" width="0.254" layer="16"/>
+<wire x1="11.43" y1="35.56" x2="11.43" y2="46.99" width="0.254" layer="16"/>
 </signal>
 <signal name="A4/LED">
 <contactref element="U$1" pad="12"/>
@@ -978,73 +995,6 @@ design rules under a new name.</description>
 <wire x1="39.37" y1="22.86" x2="33.02" y2="20.32" width="0.254" layer="1"/>
 </signal>
 </signals>
-<errors>
-<approved hash="4,1,2ad85eb78c595f9b"/>
-<approved hash="4,1,25c8574fb2ec5f9d"/>
-<approved hash="4,1,fc1d80d3e75af27a"/>
-<approved hash="4,1,4869e767e990b336"/>
-<approved hash="4,1,4569db12e13d8606"/>
-<approved hash="4,1,5a1135f32a04a2ae"/>
-<approved hash="4,1,4411257e2391b73e"/>
-<approved hash="4,1,7979291913368a16"/>
-<approved hash="4,1,508125cb55e43350"/>
-<approved hash="4,1,4c89112c1ffbb6d6"/>
-<approved hash="4,1,c2dc92991d43bb96"/>
-<approved hash="4,1,496e2a416ae62b3f"/>
-<approved hash="4,1,26d4504fa70b5c9f"/>
-<approved hash="4,1,cfd3adeb2cd5b44d"/>
-<approved hash="4,1,113d668fee359237"/>
-<approved hash="4,1,1f6899010f236c3a"/>
-<approved hash="4,1,0ccf9ee3155d71e1"/>
-<approved hash="4,1,39d2a5e114df425c"/>
-<approved hash="4,1,26e995ff1a3d5e3b"/>
-<approved hash="4,1,061cbae2155b2c90"/>
-<approved hash="4,1,3cf46bbe982b03dd"/>
-<approved hash="4,1,b0d5a75f2d05f59f"/>
-<approved hash="4,1,bc209de11cd3c642"/>
-<approved hash="4,1,aac79de31a1dd209"/>
-<approved hash="4,1,acca92811a3fac04"/>
-<approved hash="4,1,d48190cf1b3db623"/>
-<approved hash="4,1,5f52001b60539e5a"/>
-<approved hash="4,1,9c7d264c5a4ab4f9"/>
-<approved hash="4,1,67cab02664df4ba6"/>
-<approved hash="4,1,48b1cb3dddc2aace"/>
-<approved hash="4,1,bdc13240c2f744ae"/>
-<approved hash="4,1,fcd68dd906078008"/>
-<approved hash="4,16,67cab02664df4ba6"/>
-<approved hash="4,16,48b1cb3dddc2aace"/>
-<approved hash="4,16,bdc13240c2f744ae"/>
-<approved hash="4,16,fcd68dd906078008"/>
-<approved hash="4,16,4869e767e990b336"/>
-<approved hash="4,16,4569db12e13d8606"/>
-<approved hash="4,16,5a1135f32a04a2ae"/>
-<approved hash="4,16,4411257e2391b73e"/>
-<approved hash="4,16,7979291913368a16"/>
-<approved hash="4,16,508125cb55e43350"/>
-<approved hash="4,16,4c89112c1ffbb6d6"/>
-<approved hash="4,16,c2dc92991d43bb96"/>
-<approved hash="4,16,496e2a416ae62b3f"/>
-<approved hash="4,16,cfd3adeb2cd5b44d"/>
-<approved hash="4,16,113d668fee359237"/>
-<approved hash="4,16,1f6899010f236c3a"/>
-<approved hash="4,16,0ccf9ee3155d71e1"/>
-<approved hash="4,16,39d2a5e114df425c"/>
-<approved hash="4,16,26e995ff1a3d5e3b"/>
-<approved hash="4,16,061cbae2155b2c90"/>
-<approved hash="4,16,b0d5a75f2d05f59f"/>
-<approved hash="4,16,bc209de11cd3c642"/>
-<approved hash="4,16,aac79de31a1dd209"/>
-<approved hash="4,16,acca92811a3fac04"/>
-<approved hash="4,16,d48190cf1b3db623"/>
-<approved hash="5,1,e1590cf9b8126164"/>
-<approved hash="5,1,1b70f02683f35d93"/>
-<approved hash="5,1,e17934e9810261a4"/>
-<approved hash="5,1,1bb0c936bbc35d93"/>
-<approved hash="5,16,e1590cf9b8126164"/>
-<approved hash="5,16,1b70f02683f35d93"/>
-<approved hash="5,16,e17934e9810261a4"/>
-<approved hash="5,16,1bb0c936bbc35d93"/>
-</errors>
 </board>
 </drawing>
 <compatibility>

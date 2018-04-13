@@ -822,12 +822,25 @@ design rules under a new name.</description>
 <signal name="D+">
 <contactref element="U$1" pad="21"/>
 <contactref element="J1" pad="D+"/>
-<wire x1="41.89" y1="5.08" x2="33.02" y2="27.94" width="0" layer="19" extent="1-1"/>
+<wire x1="41.89" y1="5.08" x2="39.37" y2="7.62" width="0.254" layer="16"/>
+<wire x1="39.37" y1="7.62" x2="39.37" y2="10.16" width="0.254" layer="16"/>
+<wire x1="39.37" y1="10.16" x2="44.45" y2="15.24" width="0.254" layer="16"/>
+<wire x1="44.45" y1="15.24" x2="44.45" y2="24.13" width="0.254" layer="16"/>
+<wire x1="44.45" y1="24.13" x2="43.18" y2="25.4" width="0.254" layer="16"/>
+<wire x1="43.18" y1="25.4" x2="38.1" y2="25.4" width="0.254" layer="16"/>
+<wire x1="38.1" y1="25.4" x2="33.02" y2="27.94" width="0.254" layer="16"/>
 </signal>
 <signal name="D-">
 <contactref element="U$1" pad="22"/>
 <contactref element="J1" pad="D-"/>
-<wire x1="43.09" y1="4.28" x2="33.02" y2="30.48" width="0" layer="19" extent="1-1"/>
+<wire x1="43.09" y1="4.28" x2="43.09" y2="4.55996875" width="0.254" layer="16"/>
+<wire x1="44.0234" y1="11.0034" x2="45.72" y2="12.7" width="0.254" layer="16"/>
+<wire x1="43.09" y1="4.55996875" x2="44.0234" y2="5.49336875" width="0.254" layer="16"/>
+<wire x1="44.0234" y1="5.49336875" x2="44.0234" y2="11.0034" width="0.254" layer="16"/>
+<wire x1="45.72" y1="12.7" x2="45.72" y2="25.4" width="0.254" layer="16"/>
+<wire x1="45.72" y1="25.4" x2="43.18" y2="27.94" width="0.254" layer="16"/>
+<wire x1="43.18" y1="27.94" x2="38.1" y2="27.94" width="0.254" layer="16"/>
+<wire x1="38.1" y1="27.94" x2="33.02" y2="30.48" width="0.254" layer="16"/>
 </signal>
 <signal name="B13">
 <contactref element="U$1" pad="24"/>
