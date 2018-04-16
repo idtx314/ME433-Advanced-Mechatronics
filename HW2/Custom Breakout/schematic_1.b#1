@@ -181,9 +181,9 @@
 <text x="47.371" y="28.575" size="1.27" layer="22" rot="MR0">B13</text>
 <text x="47.244" y="31.115" size="1.27" layer="22" rot="MR0">B14</text>
 <text x="47.244" y="33.655" size="1.27" layer="22" rot="MR0">B15</text>
-<hole x="46.736" y="42.545" drill="0.35"/>
-<hole x="20.447" y="26.035" drill="0.35"/>
-<hole x="36.703" y="10.922" drill="0.35"/>
+<hole x="46.736" y="42.545" drill="1"/>
+<hole x="9.779" y="26.162" drill="1"/>
+<hole x="36.703" y="10.922" drill="1"/>
 <rectangle x1="24.592" y1="3.962" x2="24.672" y2="4.002" layer="22"/>
 <rectangle x1="24.592" y1="4.002" x2="24.672" y2="4.042" layer="22"/>
 <rectangle x1="24.592" y1="4.042" x2="24.672" y2="4.082" layer="22"/>
