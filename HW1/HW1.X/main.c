@@ -43,17 +43,16 @@ int main() {
 
     // set the CP0 CONFIG register to indicate that kseg0 is cacheable (0x3)
     __builtin_mtc0(_CP0_CONFIG, _CP0_CONFIG_SELECT, 0xa4210583);
-
     // 0 data RAM access wait states
     BMXCONbits.BMXWSDRM = 0x0;
-
     // enable multi vector interrupts
     INTCONbits.MVEC = 0x1;
-
     // disable JTAG to get pins back
     DDPCONbits.JTAGEN = 0;
 
     // do your TRIS and LAT commands here
+    
+    //Set up power LED and User button
     //ANSSELbits do not need to be cleared, these ports do not have analog functions
     TRISAbits.TRISA4 = 0;   //TRIS a4 to 0 (pin 12) for LED
     LATAbits.LATA4 = 1;     //LAT a4 to 1
@@ -64,7 +63,8 @@ int main() {
 
     while(1) {
     // use _CP0_SET_COUNT(0) and _CP0_GET_COUNT() to test the PIC timing
-    // remember the core timer runs at half the 48MHz sysclk, so 24MHz
+    // remember the core timer runs at half the 48MHz sysclk, so 24MHz.
+    // Should be able to see a waveform by measuring voltage across the user LED.
         while(!PORTBbits.RB4)
         {;}
         _CP0_SET_COUNT(0);
