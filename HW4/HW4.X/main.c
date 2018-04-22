@@ -121,7 +121,9 @@ void setVoltage(char channel, int voltage)
     //TODO error handling for non channel values and voltage overflow
     //TODO mechanism to shut channel down entirely if voltage set to 0 (or -1?)
     
-    DACMSGbits.VOLT = voltage;
+    //Voltage Formula: Vout = voltage = (Vref*Dn)/2^n * G
+    //                  Dn = 2^n * voltage / (Vref * G)
+    DACMSGbits.VOLT = 1024 * voltage / (3.3 * 1);
     
     
     
@@ -181,7 +183,7 @@ void ms_wave()
         while(!PORTBbits.RB4)
         {;}
         _CP0_SET_COUNT(0);
-        LATAbits.LATA4 = 1; //Turn on LED
+        setVoltage(0, 3); //Turn on LED
         while(_CP0_GET_COUNT() < 12000) //.5ms
         {;}
         LATAbits.LATA4 = 0; //Turn off LED
