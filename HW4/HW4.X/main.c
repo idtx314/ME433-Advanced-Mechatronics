@@ -137,6 +137,7 @@ void setVoltage(char channel, float voltage)
     //Voltage Formula: Vout = voltage = (Vref*Dn)/2^n * G
     //                  Dn = 2^n * voltage / (Vref * G)
     DACMSGbits.VOLT = 0b1111111111 & (int)(1024. * voltage / (3.3 * 1.));
+    //TODO add guard so that this never commands 3.3V from the DAC. Chip is only capable of 1023/1024 * 3.3V
     
     
     
