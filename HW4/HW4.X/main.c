@@ -1,4 +1,5 @@
 #include<xc.h>           // processor SFR definitions
+#include<math.h>
 #include<sys/attribs.h>  // __ISR macro
 
 // DEVCFG0
@@ -39,9 +40,12 @@
 
 //Prototypes
 void ms_wave(void);
+void demo_wave(void);
 void SPI1_init(void);
-void setVoltage(char channel, int voltage);
+void setVoltage(char channel, float voltage);
 char SPI1_io(char msg);
+double triangle_gen(double amplitude, double time, double wave_period);
+double sin_gen(double amplitude, double time, double wave_period);
 
 //Definitions
 #define CS LATBbits.LATB15  //DAC Chip select shortcut. Expects 16 bit transmissions
@@ -100,19 +104,24 @@ int main() {
     __builtin_enable_interrupts();
 
     
-    ms_wave();
+    demo_wave();
 
 
 }
 
 
-void setVoltage(char channel, int voltage)
+void setVoltage(char channel, float voltage)
 {
-    //Transmission must consist of 16 bits. 
-    //The first 4 are configuration bits for the device.
-    //The following 10 are output setting bits, from most to least significant.
-    //The last 2 are ignored.
-    //Page 23 of Data sheet for details.
+    /*
+     * Given a channel 'a' or 'b' and a voltage as a float, will set the 
+     * appropriate channel on the DAC to output the given voltage.
+     *
+     * Transmission must consist of 16 bits. 
+     * The first 4 are configuration bits for the device.
+     * The following 10 are output setting bits, from most to least significant.
+     * The last 2 are ignored.
+     * Page 23 of Data sheet for details.
+     */
 
     if(channel == 'a' || channel == 'A')
     {
@@ -140,7 +149,9 @@ void setVoltage(char channel, int voltage)
 
 char SPI1_io(char msg)
 {
-    //Send a byte and receive a byte, which is then returned.
+    /*
+     * Send a byte and receive a byte, which is then returned.
+     */
     SPI1BUF = msg;
     while(!SPI1STATbits.SPIRBF)
     {;}
@@ -149,6 +160,9 @@ char SPI1_io(char msg)
 
 void SPI1_init(void) 
 {
+    /*
+     * Sets up the SPI1 channel on the PIC
+     */
     //Some Registers of Note
     //SPIxSTATbits.SPITXBF  //Set when SPIxBUF has outgoing data in it.
     //SPIxSTATbits.SPIRXBF  //Set when SPIxBUF has incoming data in it.
@@ -188,13 +202,91 @@ void ms_wave()
         while(!PORTBbits.RB4)
         {;}
         _CP0_SET_COUNT(0);
-        setVoltage('b', 3); //VoutA to 3V
+        setVoltage('a', 3); //VoutA to 3V
         LATAbits.LATA4 = 1; //Turn on LED
         while(_CP0_GET_COUNT() < 12000) //.5ms
         {;}
-        setVoltage('b', 0); //VoutA to 0V
+        setVoltage('a', 0); //VoutA to 0V
         LATAbits.LATA4 = 0; //Turn off LED
         while(_CP0_GET_COUNT() < 24000) //1ms
         {;}
     }
+}
+
+void demo_wave()
+{
+
+    //Variables
+    double t_wave_period = 1.0/5.0;             //Seconds per wave
+    double t_duration = t_wave_period;                //Duration of the trajectory
+    double s_wave_period = 1.0/10.0;            //Seconds per wave
+    double s_duration = s_wave_period;                //Duration of the trajectory    
+    double samp = 1000.;                //Samples per second
+    double t_time = 0;                    //Time stamp
+    double s_time = 0;
+    int i;
+    int j;
+
+
+
+    double t_numsamps = samp * t_duration;  //Total Samples
+    double s_numsamps = samp * s_duration;
+    double t_pointarray[(int)t_numsamps];
+    double t_timearray[(int)t_numsamps];
+    double s_pointarray[(int)s_numsamps];
+    double s_timearray[(int)s_numsamps];
+    
+
+    for(i=0; i<(int)t_numsamps; i++)
+    {
+        t_pointarray[i] = triangle_gen(3.29, t_time, t_wave_period);
+        t_timearray[i] = t_time;
+        t_time = t_time + 1.0/samp;          //Seconds per sample
+    }
+    for(j=0; j<(int)s_numsamps; j++)
+    {
+        s_pointarray[j] = sin_gen(1.64, s_time, s_wave_period);
+        s_timearray[j] = s_time;
+        s_time = s_time + 1.0/samp;          //Seconds per sample
+    }
+        
+
+    i=j=0;
+    int sample_period = (int)(1./samp * 1000. * 24000.);  //In s/sample * ms/s * ticks/ms
+    
+    while(1) {
+    // use _CP0_SET_COUNT(0) and _CP0_GET_COUNT() to test the PIC timing
+    // remember the core timer runs at half the 48MHz sysclk, so 24MHz.
+    // Should be able to see a waveform by measuring voltage across the user LED.        
+        
+        while(!PORTBbits.RB4)
+        {;}
+        
+        _CP0_SET_COUNT(0);
+        setVoltage('b', t_pointarray[i]); //VoutB to Triangle
+        setVoltage('a', s_pointarray[j]); //VoutA to Sine
+        i++;
+        j++;
+        if(i >= t_numsamps)
+            i=0;
+        if(j >= s_numsamps)
+            j=0;
+        LATAbits.LATA4 = 1; //Turn on LED
+        while(_CP0_GET_COUNT() < sample_period/2) //.5ms
+        {;}
+        LATAbits.LATA4 = 0; //Turn off LED
+        while(_CP0_GET_COUNT() < sample_period) //24,000 ticks, or 1 ms
+        {;}
+    }
+}
+
+double triangle_gen(double amplitude, double time, double wave_period)
+{
+    return (amplitude * 2/wave_period * (wave_period/2 - fabs(fmod(time, wave_period) - wave_period/2)));
+}
+
+double sin_gen(double amplitude, double time, double wave_period)
+{
+    float phase = 0.0;
+    return amplitude * sin(2.0 * 3.14159 * 1.0/wave_period * time + phase) + 1.65;
 }
