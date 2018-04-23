@@ -53,8 +53,7 @@ typedef union {
     uint16_t GA:1;
     uint16_t SHDN:1;
     uint16_t VOLT:10;
-    uint16_t :1;
-    uint16_t :1;
+    uint16_t X:2;
   };
   struct {
     uint16_t byte1:8;
@@ -89,9 +88,10 @@ int main() {
     
     //Set up SPI1
     SPI1_init();
-    DACMSGbits.BUF = 0;
-    DACMSGbits.GA = 1;
-    DACMSGbits.SHDN = 1;
+    DACMSGbits.BUF = 0b1;
+    DACMSGbits.GA = 0b1;
+    DACMSGbits.SHDN = 0b1;
+    DACMSGbits.X = 0b0;
     
     __builtin_enable_interrupts();
 
@@ -123,13 +123,14 @@ void setVoltage(char channel, int voltage)
     
     //Voltage Formula: Vout = voltage = (Vref*Dn)/2^n * G
     //                  Dn = 2^n * voltage / (Vref * G)
-    DACMSGbits.VOLT = (int)(1024. * voltage / (3.3 * 1.));
+    DACMSGbits.VOLT = 0b1111111111 & (int)(1024. * voltage / (3.3 * 1.));
     
     
     
     CS = 0;                         //Begin command
     SPI1_io(DACMSGbits.byte1);      //Though given as ints, these will be read as characters.
     SPI1_io(DACMSGbits.byte2);
+    SPI1_io(0x01);
     CS = 1;                         //End command
 }
 
@@ -165,7 +166,7 @@ void SPI1_init(void)
     // SPI initialization for talking to DAC chip
     SPI1CON = 0;            // stop and reset SPI4
     SPI1BUF;                // read to clear the rx receive buffer
-    SPI1BRG = 0xF9F;          // bit rate to 12 MHz, SPI1BRG = 48000000/(2*desired)-1
+    SPI1BRG = 0x1999;          // bit rate to 12 MHz, SPI1BRG = 48000000/(2*desired)-1
     SPI1STATbits.SPIROV = 0;// clear the overflow
     SPI1CONbits.MSTEN = 1;  // master mode
     SPI1CONbits.CKE = 1;    // Change output data when clock goes from hi to low.
@@ -183,13 +184,13 @@ void ms_wave()
         while(!PORTBbits.RB4)
         {;}
         _CP0_SET_COUNT(0);
-        setVoltage(0, 3); //VoutA to 3V
+        setVoltage('b', 3); //VoutA to 3V
         LATAbits.LATA4 = 1; //Turn on LED
-        while(_CP0_GET_COUNT() < 12000) //.5ms
-        {;}
-        setVoltage(0, 0); //VoutA to 0V
-        LATAbits.LATA4 = 0; //Turn off LED
-        while(_CP0_GET_COUNT() < 24000) //1ms
+//        while(_CP0_GET_COUNT() < 12000) //.5ms
+//        {;}
+//        setVoltage('a', 3); //VoutA to 0V
+//        LATAbits.LATA4 = 0; //Turn off LED
+        while(_CP0_GET_COUNT() < 24000000) //1s
         {;}
     }
 }
