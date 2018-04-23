@@ -48,19 +48,19 @@ char SPI1_io(char msg);
 
 typedef union {
   struct {
-    uint16_t CHAN:1;
-    uint16_t BUF:1;
-    uint16_t GA:1;
-    uint16_t SHDN:1;
-    uint16_t VOLT:10;
-    uint16_t X:2;
+    unsigned int X:2;
+    unsigned int VOLT:10;
+    unsigned int SHDN:1;
+    unsigned int GA:1;
+    unsigned int BUF:1;
+    unsigned int CHAN:1;
   };
   struct {
-    uint16_t byte1:8;
-    uint16_t byte2:8;
+    unsigned int byte2:8;
+    unsigned int byte1:8;
   };
   struct {
-    uint16_t w:16;
+    unsigned int w:16;
   };
 } __DAC_MSG_bits_t;
 
@@ -128,11 +128,12 @@ void setVoltage(char channel, int voltage)
     
     
     CS = 0;                         //Begin command
-//    SPI1_io(DACMSGbits.byte1);      //Though given as ints, these will be read as characters.
-//    SPI1_io(DACMSGbits.byte2);
+    SPI1_io(DACMSGbits.byte1);      //Though given as ints, these should be read as characters.
+    SPI1_io(DACMSGbits.byte2);
 //    SPI1_io(0x01);
-    SPI1_io(0b01111111);
-    SPI1_io(0b11111100);
+//    SPI1_io(0b01111111);
+//    SPI1_io(0b11111100);
+    //TODO a pause here?
     CS = 1;                         //End command
 }
 
