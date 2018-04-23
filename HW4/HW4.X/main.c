@@ -128,9 +128,11 @@ void setVoltage(char channel, int voltage)
     
     
     CS = 0;                         //Begin command
-    SPI1_io(DACMSGbits.byte1);      //Though given as ints, these will be read as characters.
-    SPI1_io(DACMSGbits.byte2);
-    SPI1_io(0x01);
+//    SPI1_io(DACMSGbits.byte1);      //Though given as ints, these will be read as characters.
+//    SPI1_io(DACMSGbits.byte2);
+//    SPI1_io(0x01);
+    SPI1_io(0b01111111);
+    SPI1_io(0b11111100);
     CS = 1;                         //End command
 }
 
