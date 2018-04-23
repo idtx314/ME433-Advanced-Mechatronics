@@ -66,6 +66,10 @@ typedef union {
 
 __DAC_MSG_bits_t DACMSGbits;
 
+
+//TODO
+// Change setVoltage to float voltage
+
 int main() {
 
     __builtin_disable_interrupts();
@@ -91,7 +95,7 @@ int main() {
     DACMSGbits.BUF = 0b1;
     DACMSGbits.GA = 0b1;
     DACMSGbits.SHDN = 0b1;
-    DACMSGbits.X = 0b0;
+    DACMSGbits.X = 0b00;
     
     __builtin_enable_interrupts();
 
@@ -130,9 +134,6 @@ void setVoltage(char channel, int voltage)
     CS = 0;                         //Begin command
     SPI1_io(DACMSGbits.byte1);      //Though given as ints, these should be read as characters.
     SPI1_io(DACMSGbits.byte2);
-//    SPI1_io(0x01);
-//    SPI1_io(0b01111111);
-//    SPI1_io(0b11111100);
     //TODO a pause here?
     CS = 1;                         //End command
 }
@@ -169,7 +170,7 @@ void SPI1_init(void)
     // SPI initialization for talking to DAC chip
     SPI1CON = 0;            // stop and reset SPI4
     SPI1BUF;                // read to clear the rx receive buffer
-    SPI1BRG = 0x1999;          // bit rate to 12 MHz, SPI1BRG = 48000000/(2*desired)-1
+    SPI1BRG = 0x1;          // TODO bit rate to 12 MHz, SPI1BRG = 48000000/(2*desired)-1
     SPI1STATbits.SPIROV = 0;// clear the overflow
     SPI1CONbits.MSTEN = 1;  // master mode
     SPI1CONbits.CKE = 1;    // Change output data when clock goes from hi to low.
@@ -189,11 +190,11 @@ void ms_wave()
         _CP0_SET_COUNT(0);
         setVoltage('b', 3); //VoutA to 3V
         LATAbits.LATA4 = 1; //Turn on LED
-//        while(_CP0_GET_COUNT() < 12000) //.5ms
-//        {;}
-//        setVoltage('a', 3); //VoutA to 0V
-//        LATAbits.LATA4 = 0; //Turn off LED
-        while(_CP0_GET_COUNT() < 24000000) //1s
+        while(_CP0_GET_COUNT() < 12000) //.5ms
+        {;}
+        setVoltage('b', 0); //VoutA to 0V
+        LATAbits.LATA4 = 0; //Turn off LED
+        while(_CP0_GET_COUNT() < 24000) //1ms
         {;}
     }
 }
