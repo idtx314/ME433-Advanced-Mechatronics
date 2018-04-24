@@ -136,8 +136,7 @@ void setVoltage(char channel, float voltage)
     
     //Voltage Formula: Vout = voltage = (Vref*Dn)/2^n * G
     //                  Dn = 2^n * voltage / (Vref * G)
-    DACMSGbits.VOLT = 0b1111111111 & (int)(1024. * voltage / (3.3 * 1.));
-    //TODO add guard so that this never commands 3.3V from the DAC. Chip is only capable of 1023/1024 * 3.3V
+    DACMSGbits.VOLT = 0b1111111111 & (int)(1023. * voltage / (3.3 * 1.));
     
     
     
@@ -240,13 +239,13 @@ void demo_wave()
 
     for(i=0; i<(int)t_numsamps; i++)
     {
-        t_pointarray[i] = triangle_gen(3.29, t_time, t_wave_period);
+        t_pointarray[i] = triangle_gen(3.3, t_time, t_wave_period);
         t_timearray[i] = t_time;
         t_time = t_time + 1.0/samp;          //Seconds per sample
     }
     for(j=0; j<(int)s_numsamps; j++)
     {
-        s_pointarray[j] = sin_gen(1.64, s_time, s_wave_period);
+        s_pointarray[j] = sin_gen(1.65, s_time, s_wave_period);
         s_timearray[j] = s_time;
         s_time = s_time + 1.0/samp;          //Seconds per sample
     }
