@@ -1,0 +1,57 @@
+
+Configure SPI
+    Need CK, SS, DAOut, DAIn (dummy),
+    SCK1 (B14) see peripheral
+        Handled automatically once SPI initialized?
+
+
+    SS1 use digital I/O (B15)
+        TRISBbits.TRISB15 = 0
+        LATBbits.LATB15 = Low to start command, high to end command
+
+    SDO1 Set in registers (B8) 0011
+        if the function is an output (like SDO, SS, or OC), the pin points to the function. For example, RPB15Rbits.RPB15R = 0b0101; assigns OC1 to pin B15.
+
+    SDI1 Set in registers (A1) 0000
+        if the function is an input (like SDI or INT), the function points to the pin. For example, INT4Rbits.INT4R = 0b0011; assigns INT4 to pin B15.
+
+
+    LDAC to ground
+
+Configure DAC
+Command the DAC over SPI to set the voltage of the two output channels
+
+"Do not enable automatic control of SS1, just use your pin as a digital pin (initialized with TRIS and set with LAT)."
+
+For your library, write an initialization function for the communication, like void initSPI1() and functions that do generic communication, like char SPI1_IO(char write).
+
+void setVoltage(char channel, int voltage) where channel is 0 or 1 (for VoutA and VoutB), and voltage is the 10-bit output level.
+
+
+
+void setVoltage(char channel, int voltage)
+1 bit  output channel
+10 bit output level
+
+
+The input buffer amplifiers for the MCP4902/4912/4922
+devices provide low offset voltage and low noise. A
+Configuration bit for each DAC allows the V REF input to
+bypass the V REF input buffer amplifiers, achieving a
+Buffered or Unbuffered mode. Buffered mode provides
+a very high input impedance, with only minor limitations
+on the input range and frequency response.
+Unbuffered (<BUF> = 0) is the default configuration.
+Unbuffered mode provides a wide input range (0V to
+V DD ), with a typical input impedance of 165 k with
+7 pF.
+
+
+Not sure I've set the CKE and CKP registers correctly. Waveform looks a bit different from MCP49 Family pg. 25, the clock starts high I think. It seems to work though.
+Union couldn't be referenced in functions while it was extern volatile. Need in function declaration in some cases?
+
+DAC range is from 0 to 1023/1024 * 3.29
+    If you command 3.3 you will get 0, so
+
+
+
