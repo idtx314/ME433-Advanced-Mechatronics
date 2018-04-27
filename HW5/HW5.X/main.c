@@ -1,6 +1,7 @@
 #include<xc.h>           // processor SFR definitions
 #include<math.h>
 #include<sys/attribs.h>  // __ISR macro
+#include"i2clib.h"
 
 /*Notes
  * SYSCLK = 48MHz
@@ -48,6 +49,7 @@
 void ms_wave(void);
 void demo_wave(void);
 void SPI1_init(void);
+void i2c2_init(void);
 void setVoltage(char channel, float voltage);
 char SPI1_io(char msg);
 double triangle_gen(double amplitude, double time, double wave_period);
@@ -78,6 +80,14 @@ __DAC_MSG_bits_t DACMSGbits;
 
 
 /*TODO
+ * Write I2C2 setup for PIC
+ *  Turn off analog
+ * write init_expander, set_expander, get_expander
+ * Create heartbeat on the PIC LED
+ * Create the button and LED circuit
+ * Set LED
+ * Use button to toggle LED
+ * Create the Connection circuit
  * 
  */
 
@@ -107,6 +117,11 @@ int main() {
     DACMSGbits.GA = 0b1;
     DACMSGbits.SHDN = 0b1;
     DACMSGbits.X = 0b00;
+    
+    //Set up I2C
+    ANSELBbits.ANSB2 = 0;
+    ANSELBbits.ANSB3 = 0;
+    i2c_master_setup();
     
     __builtin_enable_interrupts();
 
