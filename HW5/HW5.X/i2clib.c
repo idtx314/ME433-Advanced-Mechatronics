@@ -6,6 +6,27 @@
 // Change I2C2 to the I2C channel you are using
 // I2C pins need pull-up resistors, 2k-10k
 
+void i2c_init_expander(void){
+    //Activate Pullup Resistors
+    i2c_master_start();             //Start
+    i2c_master_send(0b01000000);    //OpcodeW
+    i2c_master_send(0b00000110);    //Register
+    i2c_master_send(0b11110000);    //Settings
+    i2c_master_stop();              //Stop
+    
+    i2c_master_start();             //Start
+    i2c_master_send(0b01000000);    //OpcodeW
+    i2c_master_send(0b00001001);    //Register
+    i2c_master_send(0b00001111);    //Settings
+    i2c_master_stop();              //Stop
+
+    i2c_master_start();             //Start
+    i2c_master_send(0b01000000);    //OpcodeW
+    i2c_master_send(0b00000000);    //Register
+    i2c_master_send(0b11110000);    //Settings
+    i2c_master_stop();              //Stop
+}
+
 void i2c_master_setup(void) {
   I2C2BRG = 53;            // I2CBRG = [1/(2*Fsck) - PGD]*Pblck - 2
                                     // look up PGD for your PIC32

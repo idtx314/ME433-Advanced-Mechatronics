@@ -80,14 +80,19 @@ __DAC_MSG_bits_t DACMSGbits;
 
 
 /*TODO
- * Write I2C2 setup for PIC
- *  Turn off analog
+ * Address = 0100 A2,A1,A0,R/W
  * write init_expander, set_expander, get_expander
  * Create heartbeat on the PIC LED
  * Create the button and LED circuit
+ * Set inputs and outputs
+ *  Set register 0x00 = 1111 0000
  * Set LED
+ *  Set register 0x09 = 0000 1111  GP0<0>
  * Use button to toggle LED
+ *  Set register 0x06 = 1111 0000  PU7<7> Internal pull up resistor has power
+ *  Red register 0x09 <7>
  * Create the Connection circuit
+ * 
  * 
  */
 
@@ -122,6 +127,7 @@ int main() {
     ANSELBbits.ANSB2 = 0;
     ANSELBbits.ANSB3 = 0;
     i2c_master_setup();
+    i2c_init_expander();
     
     __builtin_enable_interrupts();
 
@@ -132,8 +138,7 @@ int main() {
 }
 
 
-void setVoltage(char channel, float voltage)
-{
+void setVoltage(char channel, float voltage){
     /*
      * Given a channel 'a' or 'b' and a voltage as a float, will set the 
      * appropriate channel on the DAC to output the given voltage.
@@ -169,8 +174,7 @@ void setVoltage(char channel, float voltage)
     CS = 1;                         //End command
 }
 
-char SPI1_io(char msg)
-{
+char SPI1_io(char msg){
     /*
      * Send a byte and receive a byte, which is then returned.
      */
@@ -180,8 +184,7 @@ char SPI1_io(char msg)
     return SPI1BUF;
 }
 
-void SPI1_init(void) 
-{
+void SPI1_init(void) {
     /*
      * Sets up the SPI1 channel on the PIC
      */
@@ -215,8 +218,7 @@ void SPI1_init(void)
 }
 
 
-void ms_wave()
-{
+void ms_wave(){
     while(1) {
     // use _CP0_SET_COUNT(0) and _CP0_GET_COUNT() to test the PIC timing
     // remember the core timer runs at half the 48MHz sysclk, so 24MHz.
@@ -235,8 +237,7 @@ void ms_wave()
     }
 }
 
-void demo_wave()
-{
+void demo_wave(){
 
     //Variables
     double t_wave_period = 1.0/5.0;             //Seconds per wave
@@ -302,13 +303,11 @@ void demo_wave()
     }
 }
 
-double triangle_gen(double amplitude, double time, double wave_period)
-{
+double triangle_gen(double amplitude, double time, double wave_period){
     return (amplitude * 2/wave_period * (wave_period/2 - fabs(fmod(time, wave_period) - wave_period/2)));
 }
 
-double sin_gen(double amplitude, double time, double wave_period)
-{
+double sin_gen(double amplitude, double time, double wave_period){
     float phase = 0.0;
     return amplitude * sin(2.0 * 3.14159 * 1.0/wave_period * time + phase) + 1.65;
 }
