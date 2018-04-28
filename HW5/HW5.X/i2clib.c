@@ -6,6 +6,39 @@
 // Change I2C2 to the I2C channel you are using
 // I2C pins need pull-up resistors, 2k-10k
 
+
+char read_expander(char reg){
+    /*
+     * Given a register, returns the byte in that register
+     */
+    
+    char r;
+    
+    i2c_master_start();
+    i2c_master_send(0b01000000);    //OpcodeW
+    i2c_master_send(reg);           //Register
+    i2c_master_restart();           //Restart
+    i2c_master_send(0b01000001);    //OpcodeR
+    r = i2c_master_recv();          //Read
+    i2c_master_ack(1);              //Acknowledge, Ending Read
+    i2c_master_stop();              //Stop
+    
+    return r;
+}
+
+void set_expander(char reg, char bits){
+    /*
+     * Given an address for the register and the byte to write,
+     * writes the byte to the register on the port expander.
+     */
+    
+    i2c_master_start();
+    i2c_master_send(0b01000000);    //OpcodeW
+    i2c_master_send(reg);           //Register
+    i2c_master_send(bits);          //Settings
+    i2c_master_stop();              //Stop   
+}
+
 void i2c_init_expander(void){
     //Activate Pullup Resistors
     i2c_master_start();             //Start
@@ -14,12 +47,14 @@ void i2c_init_expander(void){
     i2c_master_send(0b11110000);    //Settings
     i2c_master_stop();              //Stop
     
+    //Set Outputs to 1
     i2c_master_start();             //Start
     i2c_master_send(0b01000000);    //OpcodeW
     i2c_master_send(0b00001001);    //Register
     i2c_master_send(0b00001111);    //Settings
     i2c_master_stop();              //Stop
 
+    //Set I/O
     i2c_master_start();             //Start
     i2c_master_send(0b01000000);    //OpcodeW
     i2c_master_send(0b00000000);    //Register

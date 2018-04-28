@@ -6,6 +6,8 @@
 /*Notes
  * SYSCLK = 48MHz
  * PBCLK = SYSCLK
+ * Expander Address = 0100 A2,A1,A0,R/W
+ * R = 1, W = 0
  *  
  */
 
@@ -80,19 +82,7 @@ __DAC_MSG_bits_t DACMSGbits;
 
 
 /*TODO
- * Address = 0100 A2,A1,A0,R/W
- * write init_expander, set_expander, get_expander
- * Create heartbeat on the PIC LED
- * Create the button and LED circuit
- * Set inputs and outputs
- *  Set register 0x00 = 1111 0000
- * Set LED
- *  Set register 0x09 = 0000 1111  GP0<0>
- * Use button to toggle LED
- *  Set register 0x06 = 1111 0000  PU7<7> Internal pull up resistor has power
- *  Red register 0x09 <7>
- * Create the Connection circuit
- * 
+ * Move heartbeat into being an interrupt 
  * 
  */
 
@@ -132,7 +122,19 @@ int main() {
     __builtin_enable_interrupts();
 
     
-    demo_wave();
+    //register 0x09 is GPIO
+    //read it to read
+    //write it to have bits written to latch
+    while(1) {
+        _CP0_SET_COUNT(0);
+        if((read_expander(0x09) & 0b10000000) == 0)
+            set_expander(0x09, 0b00000001);  //LED on
+        else
+            set_expander(0x09, 0b00000000);  //LED off
+        LATAINV = 1 << 4;
+        while(_CP0_GET_COUNT() < 1200000)     //Wait 1/20 s
+        {;}
+    }
 
 
 }
@@ -216,7 +218,6 @@ void SPI1_init(void) {
     SPI1CONbits.ON = 1;     // turn SPI on
     
 }
-
 
 void ms_wave(){
     while(1) {
