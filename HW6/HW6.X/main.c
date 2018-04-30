@@ -1,7 +1,6 @@
 #include<xc.h>           // processor SFR definitions
-#include<math.h>
 #include<sys/attribs.h>  // __ISR macro
-#include"i2clib.h"
+#include "ST7735.h"          //LCD Library
 
 /*Notes
  * SYSCLK = 48MHz
@@ -48,37 +47,8 @@
 
 
 //Prototypes
-void ms_wave(void);
-void demo_wave(void);
-void SPI1_init(void);
-void i2c2_init(void);
-void setVoltage(char channel, float voltage);
-char SPI1_io(char msg);
-double triangle_gen(double amplitude, double time, double wave_period);
-double sin_gen(double amplitude, double time, double wave_period);
 
 //Definitions
-#define CS LATBbits.LATB15  //DAC Chip select shortcut. Expects 16 bit transmissions
-
-typedef union {
-  struct {
-    unsigned int X:2;
-    unsigned int VOLT:10;
-    unsigned int SHDN:1;
-    unsigned int GA:1;
-    unsigned int BUF:1;
-    unsigned int CHAN:1;
-  };
-  struct {
-    unsigned int byte2:8;
-    unsigned int byte1:8;
-  };
-  struct {
-    unsigned int w:16;
-  };
-} __DAC_MSG_bits_t;
-
-__DAC_MSG_bits_t DACMSGbits;
 
 
 /*TODO
@@ -98,7 +68,7 @@ int main() {
     INTCONbits.MVEC = 0x1;
     // disable JTAG to get pins back
     DDPCONbits.JTAGEN = 0;
-
+    
     // do your TRIS and LAT commands here
     //Set up power LED and User button
     //ANSSELbits do not need to be cleared, these ports do not have analog functions
@@ -107,208 +77,23 @@ int main() {
     TRISBbits.TRISB4 = 1;   //TRIS b4 to 1nput (pin 11) for button
     
     //Set up SPI1
-    SPI1_init();
-    DACMSGbits.BUF = 0b1;
-    DACMSGbits.GA = 0b1;
-    DACMSGbits.SHDN = 0b1;
-    DACMSGbits.X = 0b00;
-    
-    //Set up I2C
-    ANSELBbits.ANSB2 = 0;
-    ANSELBbits.ANSB3 = 0;
-    i2c_master_setup();
-    i2c_init_expander();
-    
+    //Set up LCD
+    LCD_init();
+        
     __builtin_enable_interrupts();
 
     
-    //register 0x09 is GPIO
-    //read it to read
-    //write it to have bits written to latch
-    while(1) {
-        _CP0_SET_COUNT(0);
-        if((read_expander(0x09) & 0b10000000) == 0)
-            set_expander(0x09, 0b00000001);  //LED on
-        else
-            set_expander(0x09, 0b00000000);  //LED off
-        LATAINV = 1 << 4;
-        while(_CP0_GET_COUNT() < 1200000)     //Wait 1/20 s
-        {;}
-    }
-
-
-}
-
-
-void setVoltage(char channel, float voltage){
-    /*
-     * Given a channel 'a' or 'b' and a voltage as a float, will set the 
-     * appropriate channel on the DAC to output the given voltage.
-     *
-     * Transmission must consist of 16 bits. 
-     * The first 4 are configuration bits for the device.
-     * The following 10 are output setting bits, from most to least significant.
-     * The last 2 are ignored.
-     * Page 23 of Data sheet for details.
-     */
-
-    if(channel == 'a' || channel == 'A')
-    {
-        DACMSGbits.CHAN = 0b0;
-    }
-    else if(channel == 'b' || channel == 'B')
-    {
-        DACMSGbits.CHAN = 0b1;
-    }
-    //TODO error handling for non channel values and voltage overflow
-    //TODO mechanism to shut channel down entirely if voltage set to 0 (or -1?)
-    
-    //Voltage Formula: Vout = voltage = (Vref*Dn)/2^n * G
-    //                  Dn = 2^n * voltage / (Vref * G)
-    DACMSGbits.VOLT = 0b1111111111 & (int)(1023. * voltage / (3.3 * 1.));
-    
-    
-    
-    CS = 0;                         //Begin command
-    SPI1_io(DACMSGbits.byte1);      //Though given as ints, these should be read as characters.
-    SPI1_io(DACMSGbits.byte2);
-    //TODO a pause here?
-    CS = 1;                         //End command
-}
-
-char SPI1_io(char msg){
-    /*
-     * Send a byte and receive a byte, which is then returned.
-     */
-    SPI1BUF = msg;
-    while(!SPI1STATbits.SPIRBF)
-    {;}
-    return SPI1BUF;
-}
-
-void SPI1_init(void) {
-    /*
-     * Sets up the SPI1 channel on the PIC
-     */
-    //Some Registers of Note
-    //SPIxSTATbits.SPITXBF  //Set when SPIxBUF has outgoing data in it.
-    //SPIxSTATbits.SPIRXBF  //Set when SPIxBUF has incoming data in it.
-    //SPIxBUF               //Use to read and write data.
-    //SPIxCONbits.DISSDI    //Disable SDIx pin, free pin for PORT to control.
-    //SPIxCONbits.CKP       //Configure clock active hi or active low.
-    //SPIxCONbits.CKE       //Configure whether output changes on rising or falling edge.
-    
-    
-    //Chip select configuration
-    TRISBbits.TRISB15 = 0;
-    LATBbits.LATB15 = 1;     //Low to start command, high to end command
-    
-    //Reprogrammable Pin Setup
-    RPB8Rbits.RPB8R = 0b0011;   //SDO1 on B8
-    SDI1Rbits.SDI1R = 0b0000;   //SDI1 on A1
-
-            
-    // SPI initialization for talking to DAC chip
-    SPI1CON = 0;            // stop and reset SPI4
-    SPI1BUF;                // read to clear the rx receive buffer
-    SPI1BRG = 0x1;          // Bit rate to 12 MHz, SPI1BRG = SysCLK/(2*desired)-1
-    SPI1STATbits.SPIROV = 0;// clear the overflow
-    SPI1CONbits.MSTEN = 1;  // master mode
-    SPI1CONbits.CKE = 1;    // Change output data when clock goes from hi to low.
-    SPI1CONbits.ON = 1;     // turn SPI on
-    
-}
-
-void ms_wave(){
-    while(1) {
-    // use _CP0_SET_COUNT(0) and _CP0_GET_COUNT() to test the PIC timing
-    // remember the core timer runs at half the 48MHz sysclk, so 24MHz.
-    // Should be able to see a waveform by measuring voltage across the user LED.
-        while(!PORTBbits.RB4)
-        {;}
-        _CP0_SET_COUNT(0);
-        setVoltage('a', 3); //VoutA to 3V
-        LATAbits.LATA4 = 1; //Turn on LED
-        while(_CP0_GET_COUNT() < 12000) //.5ms
-        {;}
-        setVoltage('a', 0); //VoutA to 0V
-        LATAbits.LATA4 = 0; //Turn off LED
-        while(_CP0_GET_COUNT() < 24000) //1ms
-        {;}
-    }
-}
-
-void demo_wave(){
-
-    //Variables
-    double t_wave_period = 1.0/5.0;             //Seconds per wave
-    double t_duration = t_wave_period;                //Duration of the trajectory
-    double s_wave_period = 1.0/10.0;            //Seconds per wave
-    double s_duration = s_wave_period;                //Duration of the trajectory    
-    double samp = 1000.;                //Samples per second
-    double t_time = 0;                    //Time stamp
-    double s_time = 0;
-    int i;
-    int j;
-
-
-
-    double t_numsamps = samp * t_duration;  //Total Samples
-    double s_numsamps = samp * s_duration;
-    double t_pointarray[(int)t_numsamps];
-    double t_timearray[(int)t_numsamps];
-    double s_pointarray[(int)s_numsamps];
-    double s_timearray[(int)s_numsamps];
-    
-
-    for(i=0; i<(int)t_numsamps; i++)
-    {
-        t_pointarray[i] = triangle_gen(3.3, t_time, t_wave_period);
-        t_timearray[i] = t_time;
-        t_time = t_time + 1.0/samp;          //Seconds per sample
-    }
-    for(j=0; j<(int)s_numsamps; j++)
-    {
-        s_pointarray[j] = sin_gen(1.65, s_time, s_wave_period);
-        s_timearray[j] = s_time;
-        s_time = s_time + 1.0/samp;          //Seconds per sample
-    }
+    while(1){
+        if(!PORTBbits.RB4){
+            LCD_clearScreen(RED);
+        }
+        else {
+            LCD_clearScreen(BLACK);
+        }
         
-
-    i=j=0;
-    int sample_period = (int)(1./samp * 1000. * 24000.);  //In s/sample * ms/s * ticks/ms
-    
-    while(1) {
-    // use _CP0_SET_COUNT(0) and _CP0_GET_COUNT() to test the PIC timing
-    // remember the core timer runs at half the 48MHz sysclk, so 24MHz.
-    // Should be able to see a waveform by measuring voltage across the user LED.        
-        
-        while(!PORTBbits.RB4)
-        {;}
-        
-        _CP0_SET_COUNT(0);
-        setVoltage('b', t_pointarray[i]); //VoutB to Triangle
-        setVoltage('a', s_pointarray[j]); //VoutA to Sine
-        i++;
-        j++;
-        if(i >= t_numsamps)
-            i=0;
-        if(j >= s_numsamps)
-            j=0;
-        LATAbits.LATA4 = 1; //Turn on LED
-        while(_CP0_GET_COUNT() < sample_period/2) //.5ms
-        {;}
-        LATAbits.LATA4 = 0; //Turn off LED
-        while(_CP0_GET_COUNT() < sample_period) //24,000 ticks, or 1 ms
-        {;}
     }
 }
 
-double triangle_gen(double amplitude, double time, double wave_period){
-    return (amplitude * 2/wave_period * (wave_period/2 - fabs(fmod(time, wave_period) - wave_period/2)));
-}
 
-double sin_gen(double amplitude, double time, double wave_period){
-    float phase = 0.0;
-    return amplitude * sin(2.0 * 3.14159 * 1.0/wave_period * time + phase) + 1.65;
-}
+
+
