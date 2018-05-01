@@ -8,7 +8,7 @@
  * PBCLK = SYSCLK
  * Core clock = 24MHz
  * Expander Address = 0100 A2,A1,A0,R/W
- * R = 1, W = 0
+ * For writing I2C expander registers Read = 1, Write = 0
  *  
  */
 
@@ -52,6 +52,7 @@
 void LCD_drawChar(unsigned short x, unsigned short y, char character, unsigned short c1, unsigned short c2);
 void LCD_drawString(unsigned short x, unsigned short y, char* message, unsigned short c1, unsigned short c2);
 void LCD_drawBar(unsigned short x, unsigned short y, unsigned short h, unsigned short len1, unsigned short c1, unsigned short len2, unsigned short c2);
+void LCD_drawvBar(unsigned short x, unsigned short y, unsigned short h, unsigned short len1, unsigned short c1, unsigned short len2, unsigned short c2);
 
 
 //Definitions
@@ -90,19 +91,29 @@ int main() {
     __builtin_enable_interrupts();
 
     
+    LCD_test();
+    
+
+        
+}
+
+
+void LCD_test() {
     char msg[30];
     int i=0;
-    float fps=0;
     
     while(1){
         _CP0_SET_COUNT(0);
         if(!PORTBbits.RB4){
-            sprintf(msg, "Hello World %d", i);
+            sprintf(msg, "Hello World %3d", i);
             LCD_drawString(10, 10, msg, WHITE, RED);
-            LCD_drawBar(10, 20, 5, i, WHITE, 100-i, RED);
+            LCD_drawvBar(10, 20, 5, i, WHITE, 100-i, RED);
             i++;
-            if (i>100)
+            if (i>100) {
                 i=0;
+//                sprintf(msg, "                         ");
+//                LCD_drawString(0, 10, msg, WHITE, BLACK);
+            }
             sprintf(msg, "FPS: %5.2f", 1.0/(_CP0_GET_COUNT()/48000000.0)); 
             LCD_drawString(10, 30, msg, WHITE,RED);
         }
@@ -112,11 +123,8 @@ int main() {
         }
         while(_CP0_GET_COUNT() < 2400000)     //Wait 1/10 s
         {;}
-        //Do stuff, print stuff, wait
     }
-        
 }
-
 
 void LCD_drawBar(unsigned short x, unsigned short y, unsigned short h, unsigned short len1, unsigned short c1, unsigned short len2, unsigned short c2){
     int i, j;
@@ -127,6 +135,19 @@ void LCD_drawBar(unsigned short x, unsigned short y, unsigned short h, unsigned 
         }
         for (i=len1; i<len2; i++) {
             LCD_drawPixel(x+i, y+j, c2);
+        }
+    }
+    
+}
+void LCD_drawvBar(unsigned short x, unsigned short y, unsigned short h, unsigned short len1, unsigned short c1, unsigned short len2, unsigned short c2){
+    int i, j;
+    
+    for (j=0; j<h; j++) {
+        for (i=0; i<len1; i++) {
+            LCD_drawPixel(x+j, y+i, c1);
+        }
+        for (i=len1; i<len2; i++) {
+            LCD_drawPixel(x+j, y+i, c2);
         }
     }
     
