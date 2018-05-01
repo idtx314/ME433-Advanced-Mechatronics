@@ -53,7 +53,8 @@ void LCD_drawChar(unsigned short x, unsigned short y, char character, unsigned s
 void LCD_drawString(unsigned short x, unsigned short y, char* message, unsigned short c1, unsigned short c2);
 void LCD_drawBar(unsigned short x, unsigned short y, unsigned short h, unsigned short len1, unsigned short c1, unsigned short len2, unsigned short c2);
 void LCD_drawvBar(unsigned short x, unsigned short y, unsigned short h, unsigned short len1, unsigned short c1, unsigned short len2, unsigned short c2);
-
+void timer4_init();
+void LCD_test();
 
 //Definitions
 
@@ -62,6 +63,16 @@ void LCD_drawvBar(unsigned short x, unsigned short y, unsigned short h, unsigned
  * Move heartbeat into being an interrupt
  * 
  */
+
+void __ISR(_TIMER_4_VECTOR, IPL5SOFT) Heartbeat(void) { //vector = 16
+    
+    
+    //toggle light
+    LATAINV = 1 << 4;
+    
+    //reset flag
+    IFS0CLR = 1 << 19;
+}
 
 int main() {
 
@@ -75,6 +86,9 @@ int main() {
     INTCONbits.MVEC = 0x1;
     // disable JTAG to get pins back
     DDPCONbits.JTAGEN = 0;
+    
+    //Configure timer 4
+    timer4_init();
     
     // do your TRIS and LAT commands here
     //Set up power LED and User button
@@ -97,6 +111,21 @@ int main() {
         
 }
 
+void timer4_init(){
+    
+    T4CONbits.TCKPS = 0b111;//Prescaler 1:256 from SYSCLK    
+    TMR4 = 0;           //Reset count
+    PR4 = 46875;        //Set Period for 4Hz
+    
+    IPC4bits.T4IP = 5;  //Priority 5
+    IPC4bits.T4IS = 0;  //Sub-priority 0
+    IFS0bits.T4IF = 0;  //Clear flag
+    
+    
+    IEC0bits.T4IE = 1;  //Activate Interrupt
+    T4CONbits.ON = 1;   //Activate Timer
+    
+}
 
 void LCD_test() {
     char msg[30];
