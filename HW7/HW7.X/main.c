@@ -58,7 +58,7 @@ void LCD_drawBar(unsigned short x, unsigned short y, unsigned short h, unsigned 
 
 
 /*TODO
- * Move heartbeat into being an interrupt (reference I2C expander HW)
+ * Move heartbeat into being an interrupt
  * 
  */
 
