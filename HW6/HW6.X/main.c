@@ -1,6 +1,7 @@
 #include<xc.h>           // processor SFR definitions
 #include<sys/attribs.h>  // __ISR macro
 #include "ST7735.h"          //LCD Library
+#include<stdio.h>
 
 /*Notes
  * SYSCLK = 48MHz
@@ -47,12 +48,16 @@
 
 
 //Prototypes
+void LCD_drawChar(unsigned short x, unsigned short y, char character, unsigned short c1, unsigned short c2);
+void LCD_drawString(unsigned short x, unsigned short y, char* message, unsigned short c1, unsigned short c2);
+void LCD_drawBar(unsigned short x, unsigned short y, unsigned short h, unsigned short len1, unsigned short c1, unsigned short len2, unsigned short c2);
+
 
 //Definitions
 
 
 /*TODO
- * Move heartbeat into being an interrupt 
+ * Move heartbeat into being an interrupt
  * 
  */
 
@@ -80,20 +85,85 @@ int main() {
     //Set up LCD
     LCD_init();
         
+    LCD_clearScreen(BLACK);
     __builtin_enable_interrupts();
 
     
+    char msg[30];
+    int i=0;
+    float fps=0;
+    
     while(1){
+        _CP0_SET_COUNT(0);
         if(!PORTBbits.RB4){
-            LCD_clearScreen(RED);
+            sprintf(msg, "Hello World %d", i);
+            LCD_drawString(10, 10, msg, WHITE, RED);
+            LCD_drawBar(10, 20, 5, i, WHITE, 100-i, RED);
+            i++;
+            if (i>100)
+                i=0;
+            sprintf(msg, "FPS: %5.2f", 1.0/(_CP0_GET_COUNT()/48000000.0)); 
+            LCD_drawString(10, 30, msg, WHITE,RED);
         }
         else {
             LCD_clearScreen(BLACK);
+            i=0;
         }
-        
+        while(_CP0_GET_COUNT() < 2400000)     //Wait 1/10 s
+        {;}
+        //Do stuff, print stuff, wait
     }
+        
 }
 
 
+void LCD_drawBar(unsigned short x, unsigned short y, unsigned short h, unsigned short len1, unsigned short c1, unsigned short len2, unsigned short c2){
+    int i, j;
+    
+    for (j=0; j<h; j++) {
+        for (i=0; i<len1; i++) {
+            LCD_drawPixel(x+i, y+j, c1);
+        }
+        for (i=len1; i<len2; i++) {
+            LCD_drawPixel(x+i, y+j, c2);
+        }
+    }
+    
+}
 
+void LCD_drawString(unsigned short x, unsigned short y, char* message, unsigned short c1, unsigned short c2){
+    
+    short index = 0;
+    
+    while(message[index]){
+        LCD_drawChar(x, y, message[index], c1, c2);
+        x = x+5;
+        index++;
+    }
+}
 
+void LCD_drawChar(unsigned short x, unsigned short y, char character, unsigned short c1, unsigned short c2) {
+    //Model call LCD_drawChar(50, 50, 'H');
+    //8 rows, 5 column
+    
+    int column=0, row=0;
+    //get character from lookup table: an array of 5 chars
+    
+    for (column=0; column<5; column++){
+        if(x+column >= 128)
+            break;
+        char pixels = ASCII[character-0x20][column];
+        
+        //mask bits one at a time and print them
+        for (row=7; row> -1; row--){
+            if(y+row >= 160)
+                break;
+            if((pixels >> row) & 1 == 1){
+                LCD_drawPixel(x+column, y+row, c1);            
+            }
+            else {
+                LCD_drawPixel(x+column, y+row, c2);
+            }
+        }
+    }
+}
