@@ -7,6 +7,7 @@ void i2c_master_setup(void);              // set up I2C 1 as a master, at 400 kH
 void i2c_init_expander(void);             // Set up the MCP23008 I/O port expander over I2C
 char read_expander(char reg);               //Read the values of an expander register
 void set_expander(char reg, char bits);     //Set the expander register to the given bits
+void i2c_read_multiple(unsigned char address, unsigned char reg, unsigned char * data, int length);
 
 void i2c_master_start(void);              // send a START signal
 void i2c_master_restart(void);            // send a RESTART signal

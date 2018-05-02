@@ -7,8 +7,6 @@
  * SYSCLK = 48MHz
  * PBCLK = SYSCLK
  * Core clock = 24MHz
- * Expander Address = 0100 A2,A1,A0,R/W
- * For writing I2C expander registers Read = 1, Write = 0
  *  
  */
 
@@ -57,10 +55,12 @@ void timer4_init();
 void LCD_test();
 
 //Definitions
-
+#define IMUADD 0b1101010
 
 /*TODO
- * Move heartbeat into being an interrupt
+ * Use ADRESS in i2c_read_multiple()
+ * recombine data into shorts
+ * display data as bars
  * 
  */
 
@@ -105,7 +105,19 @@ int main() {
     __builtin_enable_interrupts();
 
     
-    LCD_test();
+    char data[14];
+    char msg[30];
+    //First IMU reg = 0x20
+    //length = 14
+    i2c_read_multiple(IMUADD, 0x20, data, 14);
+    sprintf(msg, "Element 1: %d", data[0]);
+    LCD_drawString(10,10,msg, WHITE, BLACK);
+    sprintf(msg, "Element 14: %d", data[13]);
+    LCD_drawString(10, 20, msg, WHITE, BLACK);
+      
+    
+    
+    //LCD_test();
     
 
         
