@@ -100,24 +100,52 @@ int main() {
     //Set up SPI1
     //Set up LCD
     LCD_init();
+    
+    //Set up I2C
+    ANSELBbits.ANSB2 = 0;
+    ANSELBbits.ANSB3 = 0;
+    i2c_master_setup();
+    i2c_init_imu();
         
     LCD_clearScreen(BLACK);
     __builtin_enable_interrupts();
 
-    
     char data[14];
+    short info[7];
+    float output[7];
     char msg[30];
-    //First IMU reg = 0x20
+    int i;
+    char whoami[1];
+    float resolution[7] = {40, 1000, 1000, 1000, 2, 2, 2};
+    
+    //First IMU measure reg = 0x20
     //length = 14
-    i2c_read_multiple(IMUADD, 0x20, data, 14);
-    sprintf(msg, "Element 1: %d", data[0]);
-    LCD_drawString(10,10,msg, WHITE, BLACK);
-    sprintf(msg, "Element 14: %d", data[13]);
-    LCD_drawString(10, 20, msg, WHITE, BLACK);
-      
     
+    i2c_read_multiple(IMUADD, 0x0F, whoami, 1);
     
-    //LCD_test();
+    sprintf(msg, "I am: %d",whoami[0]);
+    LCD_drawString(10, 10, msg, WHITE, BLACK);
+    
+    while(1){
+        i2c_read_multiple(IMUADD, 0x20, data, 14);
+
+        for(i=0; i<7; i++){
+            info[i] = (data[2*i+1])<<8 | (data[2*i]);
+            sprintf(msg, "%2d  %2d  %2d",i, 2*i, 2*i+1);
+            LCD_drawString(10, 20, msg, WHITE, BLACK);
+        }
+        
+        for(i=0; i<7; i++){
+            output[i] = (float)info[i] / 32767. * resolution[i];
+        }
+
+        for(i=0; i<7; i++){
+            sprintf(msg, "Info %2d: %6.2f",i, output[i]);
+            LCD_drawString(10, 10*i+30, msg, WHITE, BLACK);
+        }
+        while(_CP0_GET_COUNT() < 1200000)
+        {;}
+    }
     
 
         

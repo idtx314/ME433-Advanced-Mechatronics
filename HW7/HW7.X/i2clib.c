@@ -59,15 +59,13 @@ void i2c_read_multiple(unsigned char address, unsigned char reg, unsigned char *
      * data, a pointer to a data storage array of chars
      * length, the size of the storage array
      */
-    int i;
-//    OpcodeW = (address<<1) | 0;
-//    OpcodeR = (address<<1) | 1;
+    int i=0;
     
     i2c_master_start();
-    i2c_master_send(0b11010100);    //OpcodeW
-    i2c_master_send(reg);           //Register
-    i2c_master_restart();           //Restart
-    i2c_master_send(0b11010101);    //OpcodeR
+    i2c_master_send((address<<1) | 0);  //OpcodeW
+    i2c_master_send(reg);               //Register
+    i2c_master_restart();               //Restart
+    i2c_master_send((address<<1) | 1);  //OpcodeR
     
     for(i=0; i<length-1; i++){      //From first to second to last read
         data[i] = i2c_master_recv();
