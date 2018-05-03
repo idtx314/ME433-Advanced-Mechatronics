@@ -144,20 +144,20 @@ int main() {
         
         //4 = x, 5=y, 6=z 40-output[4]/2*40
         if(output[4]>0){
-            LCD_drawBar(20, 78, 5, 40, RED, 0, WHITE);
-            LCD_drawBar(68, 78, 5, output[4]/2*40, WHITE, 40, RED);
+            LCD_drawBar(22, 78, 5, 40, RED, 0, WHITE);
+            LCD_drawBar(67, 78, 5, output[4]/2*40, WHITE, 40, RED);
         }
         else if(output[4]<0){
-            LCD_drawBar(68, 78, 5, 0, WHITE, 40, RED);
-            LCD_drawBar(20, 78, 5, (unsigned short)(40+output[4]/2*40), RED, 40, WHITE);
+            LCD_drawBar(67, 78, 5, 0, WHITE, 40, RED);
+            LCD_drawBar(22, 78, 5, (unsigned short)(40+output[4]/2*40), RED, 40, WHITE);
         }
         if(output[5]>0){
-            LCD_drawvBar(62, 36, 5, 40, RED, 0, WHITE);
-            LCD_drawvBar(62, 84, 5, output[5]/2*40, WHITE, 40, RED);
+            LCD_drawvBar(62, 38, 5, 40, RED, 0, WHITE);
+            LCD_drawvBar(62, 83, 5, output[5]/2*40, WHITE, 40, RED);
         }
         else if(output[5]<0){
-            LCD_drawvBar(62, 84, 5, 0, WHITE, 40, RED);
-            LCD_drawvBar(62, 36, 5, 40+output[5]/2*40, RED, 40, WHITE);
+            LCD_drawvBar(62, 83, 5, 0, WHITE, 40, RED);
+            LCD_drawvBar(62, 38, 5, 40+output[5]/2*40, RED, 40, WHITE);
         }
         
 
