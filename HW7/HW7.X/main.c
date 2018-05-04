@@ -128,6 +128,7 @@ int main() {
     LCD_drawString(10, 10, msg, WHITE, BLACK);
     
     while(1){
+        _CP0_SET_COUNT(0);
         i2c_read_multiple(IMUADD, 0x20, data, 14);
 
         for(i=0; i<7; i++){
