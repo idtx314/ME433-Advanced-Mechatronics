@@ -56,6 +56,8 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "app.h"
 #include <stdio.h>
 #include <xc.h>
+#include "ST7735.h"          //LCD Library
+#include "i2clib.h"
 
 // *****************************************************************************
 // *****************************************************************************
@@ -67,6 +69,7 @@ uint8_t APP_MAKE_BUFFER_DMA_READY dataOut[APP_READ_BUFFER_SIZE];
 uint8_t APP_MAKE_BUFFER_DMA_READY readBuffer[APP_READ_BUFFER_SIZE];
 int len, i = 0;
 int startTime = 0; // to remember the loop time
+int blinkTime = 0;
 
 // *****************************************************************************
 /* Application Data
@@ -92,6 +95,7 @@ APP_DATA appData;
 // *****************************************************************************
 
 /* TODO:  Add any necessary callback functions.
+ * 
  */
 
 /*******************************************************
@@ -346,6 +350,12 @@ void APP_Initialize(void) {
     TRISAbits.TRISA4 = 0;   //TRIS a4 to 0 (pin 12) for LED
     LATAbits.LATA4 = 1;     //LAT a4 to 1
     TRISBbits.TRISB4 = 1;   //TRIS b4 to 1 (pin 11) for button
+    
+    // Initialize LCD
+    LCD_init();
+    LCD_clearScreen(BLACK);
+    
+    
 
     startTime = _CP0_GET_COUNT();
 }
@@ -358,14 +368,14 @@ void APP_Initialize(void) {
     See prototype in app.h.
  */
 
-void APP_Tasks(void) {
+void APP_Tasks(void) {      //Setup is such that this is only called when the USB is open(?))
     /* Update the application state machine based
      * on the current state */
 
-    _CP0_SET_COUNT(0);
-    LATAINV = 1<<4;
-    while(_CP0_GET_COUNT() < 1200000)
-    {;}
+//    LATAINV = 1<<4;
+//    while(_CP0_GET_COUNT() < startTime + 2400000)
+//    {;}
+    
     switch (appData.state) {
         case APP_STATE_INIT:
 
@@ -497,6 +507,9 @@ void APP_Tasks(void) {
         default:
             break;
     }
+    
+
+    
 }
 
 
