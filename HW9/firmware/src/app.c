@@ -69,6 +69,7 @@ uint8_t APP_MAKE_BUFFER_DMA_READY dataOut[APP_READ_BUFFER_SIZE];
 uint8_t APP_MAKE_BUFFER_DMA_READY readBuffer[APP_READ_BUFFER_SIZE];
 int len, i = 0;
 int startTime = 0; // to remember the loop time
+int readTime = 0; // Time of last IMU read
 
 // *****************************************************************************
 /* Application Data
@@ -378,7 +379,7 @@ void APP_Tasks(void) {      //Setup is such that the switch is only called when 
      * on the current state */
     
     char msg[30];
-    float data[7];
+    static float data[7] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
     static int counter = 1;
     int j=0;
 //    
@@ -469,8 +470,7 @@ void APP_Tasks(void) {      //Setup is such that the switch is only called when 
             if (appData.isReadComplete || _CP0_GET_COUNT() - startTime > (48000000 / 2 / 100)) {
                 appData.state = APP_STATE_SCHEDULE_WRITE;
             }
-
-
+            
             break;
 
 
@@ -489,7 +489,11 @@ void APP_Tasks(void) {      //Setup is such that the switch is only called when 
             /* PUT THE TEXT YOU WANT TO SEND TO THE COMPUTER IN dataOut
             AND REMEMBER THE NUMBER OF CHARACTERS IN len */
             /* THIS IS WHERE YOU CAN READ YOUR IMU, PRINT TO THE LCD, ETC */
-            i2c_read_imu(data);
+            
+            if (_CP0_GET_COUNT() - readTime > (48000000 / 2 / 5)){
+                i2c_read_imu(data);
+                readTime = _CP0_GET_COUNT();
+            }
             for(j=0; j<7; j++){
                 sprintf(msg, "Info %d: %7f",j, data[j]);
                 LCD_drawString(10, 10*j+30, msg, WHITE, BLACK);
