@@ -6,6 +6,7 @@
 void i2c_master_setup(void);              // set up I2C 1 as a master, at 400 kHz
 void i2c_init_expander(void);             // Set up the MCP23008 I/O port expander over I2C
 void i2c_init_imu(void);
+void i2c_read_imu(float * output);
 void i2c_read_multiple(unsigned char address, unsigned char reg, unsigned char * data, int length);
 void imu_test();                          //Runs an algorithm that prints IMU data to the LCD
 char read_expander(char reg);               //Read the values of an expander register

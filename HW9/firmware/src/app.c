@@ -378,7 +378,9 @@ void APP_Tasks(void) {      //Setup is such that the switch is only called when 
      * on the current state */
     
     char msg[30];
+    float data[7];
     static int counter = 1;
+    int j=0;
 //    
 //    sprintf(msg, "Iteration #%3d", counter);
 //    LCD_drawString(10, 10, msg, WHITE, BLACK);
@@ -487,7 +489,27 @@ void APP_Tasks(void) {      //Setup is such that the switch is only called when 
             /* PUT THE TEXT YOU WANT TO SEND TO THE COMPUTER IN dataOut
             AND REMEMBER THE NUMBER OF CHARACTERS IN len */
             /* THIS IS WHERE YOU CAN READ YOUR IMU, PRINT TO THE LCD, ETC */
-            imu_test();
+            i2c_read_imu(data);
+            for(j=0; j<7; j++){
+                sprintf(msg, "Info %d: %7f",j, data[j]);
+                LCD_drawString(10, 10*j+30, msg, WHITE, BLACK);
+            }
+//            if(data[4]<0){
+//                LCD_drawBar(22, 78, 5, 40, RED, 0, WHITE);
+//                LCD_drawBar(67, 78, 5, -data[4]/2*40, WHITE, 40, RED);
+//            }
+//            else if(data[4]>0){
+//                LCD_drawBar(67, 78, 5, 0, WHITE, 40, RED);
+//                LCD_drawBar(22, 78, 5, (unsigned short)(40-data[4]/2*40), RED, 40, WHITE);
+//            }
+//            if(data[5]<0){
+//                LCD_drawvBar(62, 38, 5, 40, RED, 0, WHITE);
+//                LCD_drawvBar(62, 83, 5, -data[5]/2*40, WHITE, 40, RED);
+//            }
+//            else if(data[5]>0){
+//                LCD_drawvBar(62, 83, 5, 0, WHITE, 40, RED);
+//                LCD_drawvBar(62, 38, 5, 40-data[5]/2*40, RED, 40, WHITE);
+//            }
             
             
             len = sprintf(dataOut, "%d\r\n", i);

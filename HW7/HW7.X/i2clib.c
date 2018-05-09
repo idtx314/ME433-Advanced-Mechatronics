@@ -1,7 +1,7 @@
 #include<xc.h>
+#include<stdio.h>
 #include "i2clib.h"
 #include "ST7735.h"
-#include<stdio.h>
 
 /* I2C Master utilities, 400 kHz, using polling rather than interrupts
  * The functions must be callled in the correct order as per the I2C protocol
@@ -57,7 +57,7 @@ void i2c_read_imu(float * output){
     // output must be a 7 float array
     unsigned char data[14];
     short info[7];
-    float resolution[7] = {40, 1000, 1000, 1000, 2, 2, 2};
+    float resolution[7] = {40, 1000, 1000, 1000, -2, -2, -2};
     int i;
  
     // First data register 0x20, 14 data registers total
@@ -149,21 +149,21 @@ void imu_test(){
     i2c_read_imu(output);
 
     //4 = x, 5=y, 6=z 40-output[4]/2*40
-    if(output[4]>0){
+    if(output[4]<0){
         LCD_drawBar(22, 78, 5, 40, RED, 0, WHITE);
-        LCD_drawBar(67, 78, 5, output[4]/2*40, WHITE, 40, RED);
+        LCD_drawBar(67, 78, 5, -output[4]/2*40, WHITE, 40, RED);
     }
-    else if(output[4]<0){
+    else if(output[4]>0){
         LCD_drawBar(67, 78, 5, 0, WHITE, 40, RED);
-        LCD_drawBar(22, 78, 5, (unsigned short)(40+output[4]/2*40), RED, 40, WHITE);
+        LCD_drawBar(22, 78, 5, (unsigned short)(40-output[4]/2*40), RED, 40, WHITE);
     }
-    if(output[5]>0){
+    if(output[5]<0){
         LCD_drawvBar(62, 38, 5, 40, RED, 0, WHITE);
-        LCD_drawvBar(62, 83, 5, output[5]/2*40, WHITE, 40, RED);
+        LCD_drawvBar(62, 83, 5, -output[5]/2*40, WHITE, 40, RED);
     }
-    else if(output[5]<0){
+    else if(output[5]>0){
         LCD_drawvBar(62, 83, 5, 0, WHITE, 40, RED);
-        LCD_drawvBar(62, 38, 5, 40+output[5]/2*40, RED, 40, WHITE);
+        LCD_drawvBar(62, 38, 5, 40-output[5]/2*40, RED, 40, WHITE);
     }
 
 

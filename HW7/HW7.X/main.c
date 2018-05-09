@@ -1,7 +1,7 @@
 #include<xc.h>           // processor SFR definitions
 #include<sys/attribs.h>  // __ISR macro
-#include "ST7735.h"          //LCD Library
 #include<stdio.h>
+#include "ST7735.h"          //LCD Library
 #include "i2clib.h"
 
 /*Notes

@@ -53,6 +53,26 @@ void set_expander(char reg, char bits){
     i2c_master_stop();              //Stop   
 }
 
+void i2c_read_imu(float * output){
+    // output must be a 7 float array
+    unsigned char data[14];
+    short info[7];
+    float resolution[7] = {40, 1000, 1000, 1000, -2, -2, -2};
+    int i;
+ 
+    // First data register 0x20, 14 data registers total
+    i2c_read_multiple(IMUADD, 0x20, data, 14);
+
+    for(i=0; i<7; i++){
+        info[i] = (data[2*i+1])<<8 | (data[2*i]);
+    }
+    
+    for(i=0; i<7; i++){
+        output[i] = (float)info[i] / 32767. * resolution[i];
+    }
+    
+}
+
 void i2c_read_multiple(unsigned char address, unsigned char reg, unsigned char * data, int length){
     /*
      * Inputs:
@@ -96,54 +116,54 @@ void i2c_init_imu(void){
 }
 
 void imu_test(){
-    unsigned char data[14];
-    short info[7];
+//    unsigned char data[14];
+//    short info[7];
     float output[7];
     char msg[30];
-    int i;
+//    int i;
     char whoami[1];
-    float resolution[7] = {40, 1000, 1000, 1000, 2, 2, 2};
-    short maxg = 0,ming = 0;
+//    float resolution[7] = {40, 1000, 1000, 1000, 2, 2, 2};
+//    short maxg = 0,ming = 0;
 
-    //First IMU measure reg = 0x20
-    //length = 14
-
+    //who_am_i register 0x0F
     i2c_read_multiple(IMUADD, 0x0F, whoami, 1);
 
     sprintf(msg, "I am: %d",whoami[0]);
     LCD_drawString(10, 10, msg, WHITE, BLACK);
 
+//    // First data register 0x20, 14 data registers total
+//    i2c_read_multiple(IMUADD, 0x20, data, 14);
+//
+//    for(i=0; i<7; i++){
+//        info[i] = (data[2*i+1])<<8 | (data[2*i]);
+//    }
+//    if(info[6] > maxg)
+//        maxg = info[6];
+//    if(info[6] < ming)
+//        ming = info[6];
+
+//    for(i=0; i<7; i++){
+//        output[i] = (float)info[i] / 32767. * resolution[i];
+//    }
     
-    i2c_read_multiple(IMUADD, 0x20, data, 14);
-
-    for(i=0; i<7; i++){
-        info[i] = (data[2*i+1])<<8 | (data[2*i]);
-    }
-    if(info[6] > maxg)
-        maxg = info[6];
-    if(info[6] < ming)
-        ming = info[6];
-
-    for(i=0; i<7; i++){
-        output[i] = (float)info[i] / 32767. * resolution[i];
-    }
+    i2c_read_imu(output);
 
     //4 = x, 5=y, 6=z 40-output[4]/2*40
-    if(output[4]>0){
+    if(output[4]<0){
         LCD_drawBar(22, 78, 5, 40, RED, 0, WHITE);
-        LCD_drawBar(67, 78, 5, output[4]/2*40, WHITE, 40, RED);
+        LCD_drawBar(67, 78, 5, -output[4]/2*40, WHITE, 40, RED);
     }
-    else if(output[4]<0){
+    else if(output[4]>0){
         LCD_drawBar(67, 78, 5, 0, WHITE, 40, RED);
-        LCD_drawBar(22, 78, 5, (unsigned short)(40+output[4]/2*40), RED, 40, WHITE);
+        LCD_drawBar(22, 78, 5, (unsigned short)(40-output[4]/2*40), RED, 40, WHITE);
     }
-    if(output[5]>0){
+    if(output[5]<0){
         LCD_drawvBar(62, 38, 5, 40, RED, 0, WHITE);
-        LCD_drawvBar(62, 83, 5, output[5]/2*40, WHITE, 40, RED);
+        LCD_drawvBar(62, 83, 5, -output[5]/2*40, WHITE, 40, RED);
     }
-    else if(output[5]<0){
+    else if(output[5]>0){
         LCD_drawvBar(62, 83, 5, 0, WHITE, 40, RED);
-        LCD_drawvBar(62, 38, 5, 40+output[5]/2*40, RED, 40, WHITE);
+        LCD_drawvBar(62, 38, 5, 40-output[5]/2*40, RED, 40, WHITE);
     }
 
 
