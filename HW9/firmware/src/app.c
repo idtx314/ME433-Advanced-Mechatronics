@@ -371,8 +371,14 @@ void APP_Initialize(void) {
 void APP_Tasks(void) {      //Setup is such that this is only called when the USB is open(?))
     /* Update the application state machine based
      * on the current state */
-
-    LCD_wr
+    
+    char msg[30];
+    static int counter = 1;
+    
+    sprintf(msg, "Iteration #%3d", counter);
+    LCD_drawString(10, 10, msg, WHITE, BLACK);
+    counter++;
+    
 //    LATAINV = 1<<4;
 //    while(_CP0_GET_COUNT() < startTime + 2400000)
 //    {;}
