@@ -442,6 +442,7 @@ void APP_Tasks(void) {      //Setup is such that the switch is only called when 
                     sprintf(msg, "r count: %3d", counter);
                     counter++;
                     LCD_drawString(10,20, msg, WHITE, BLACK);
+                    //TODO set a flag
                 }
 
                 if (appData.readTransferHandle == USB_DEVICE_CDC_TRANSFER_HANDLE_INVALID) {
@@ -492,6 +493,7 @@ void APP_Tasks(void) {      //Setup is such that the switch is only called when 
             len = sprintf(dataOut, "%d\r\n", i);
             i++; // increment the index so we see a change in the text
             /* IF A LETTER WAS RECEIVED, ECHO IT BACK SO THE USER CAN SEE IT */
+            //TODO if flag, read, transmit, and increment counter
             if (appData.isReadComplete) {
                 USB_DEVICE_CDC_Write(USB_DEVICE_CDC_INDEX_0,
                         &appData.writeTransferHandle,
@@ -506,6 +508,7 @@ void APP_Tasks(void) {      //Setup is such that the switch is only called when 
                         USB_DEVICE_CDC_TRANSFER_FLAGS_DATA_COMPLETE);
                 startTime = _CP0_GET_COUNT(); // reset the timer for acurate delays
             }
+            //TODO if counter > 100, clear flag
             break;
 
         case APP_STATE_WAIT_FOR_WRITE_COMPLETE:
