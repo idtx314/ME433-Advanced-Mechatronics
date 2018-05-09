@@ -372,6 +372,7 @@ void APP_Tasks(void) {      //Setup is such that this is only called when the US
     /* Update the application state machine based
      * on the current state */
 
+    LCD_wr
 //    LATAINV = 1<<4;
 //    while(_CP0_GET_COUNT() < startTime + 2400000)
 //    {;}
