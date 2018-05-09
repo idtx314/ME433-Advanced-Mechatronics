@@ -49,6 +49,7 @@
 
 //Prototypes
 void timer4_init();
+void imu_test();
 
 //Definitions
 #define IMUADD 0b1101010
@@ -105,6 +106,16 @@ int main() {
     LCD_clearScreen(BLACK);
     __builtin_enable_interrupts();
 
+    while(1){
+        _CP0_SET_COUNT(0);
+        imu_test();
+        while(_CP0_GET_COUNT() < 1200000)
+        {;}
+    }
+}
+
+
+void imu_test(){
     unsigned char data[14];
     short info[7];
     float output[7];
@@ -122,55 +133,48 @@ int main() {
     sprintf(msg, "I am: %d",whoami[0]);
     LCD_drawString(10, 10, msg, WHITE, BLACK);
 
-    while(1){
-        _CP0_SET_COUNT(0);
-        i2c_read_multiple(IMUADD, 0x20, data, 14);
+    
+    i2c_read_multiple(IMUADD, 0x20, data, 14);
 
-        for(i=0; i<7; i++){
-            info[i] = (data[2*i+1])<<8 | (data[2*i]);
-        }
-        if(info[6] > maxg)
-            maxg = info[6];
-        if(info[6] < ming)
-            ming = info[6];
+    for(i=0; i<7; i++){
+        info[i] = (data[2*i+1])<<8 | (data[2*i]);
+    }
+    if(info[6] > maxg)
+        maxg = info[6];
+    if(info[6] < ming)
+        ming = info[6];
 
-        for(i=0; i<7; i++){
-            output[i] = (float)info[i] / 32767. * resolution[i];
-        }
+    for(i=0; i<7; i++){
+        output[i] = (float)info[i] / 32767. * resolution[i];
+    }
 
-        //4 = x, 5=y, 6=z 40-output[4]/2*40
-        if(output[4]>0){
-            LCD_drawBar(22, 78, 5, 40, RED, 0, WHITE);
-            LCD_drawBar(67, 78, 5, output[4]/2*40, WHITE, 40, RED);
-        }
-        else if(output[4]<0){
-            LCD_drawBar(67, 78, 5, 0, WHITE, 40, RED);
-            LCD_drawBar(22, 78, 5, (unsigned short)(40+output[4]/2*40), RED, 40, WHITE);
-        }
-        if(output[5]>0){
-            LCD_drawvBar(62, 38, 5, 40, RED, 0, WHITE);
-            LCD_drawvBar(62, 83, 5, output[5]/2*40, WHITE, 40, RED);
-        }
-        else if(output[5]<0){
-            LCD_drawvBar(62, 83, 5, 0, WHITE, 40, RED);
-            LCD_drawvBar(62, 38, 5, 40+output[5]/2*40, RED, 40, WHITE);
-        }
-
-
-//        for(i=0; i<7; i++){
-//            sprintf(msg, "Info %d: %7d",i, info[i]);
-//            LCD_drawString(10, 10*i+30, msg, WHITE, BLACK);
-//        }
-//        sprintf(msg, "Maxg: %7d", maxg);
-//        LCD_drawString(10, 100, msg, WHITE, BLACK);
-//        sprintf(msg, "Ming: %7d", ming);
-//        LCD_drawString(10, 110, msg, WHITE, BLACK);
-
-        while(_CP0_GET_COUNT() < 1200000)
-        {;}
+    //4 = x, 5=y, 6=z 40-output[4]/2*40
+    if(output[4]>0){
+        LCD_drawBar(22, 78, 5, 40, RED, 0, WHITE);
+        LCD_drawBar(67, 78, 5, output[4]/2*40, WHITE, 40, RED);
+    }
+    else if(output[4]<0){
+        LCD_drawBar(67, 78, 5, 0, WHITE, 40, RED);
+        LCD_drawBar(22, 78, 5, (unsigned short)(40+output[4]/2*40), RED, 40, WHITE);
+    }
+    if(output[5]>0){
+        LCD_drawvBar(62, 38, 5, 40, RED, 0, WHITE);
+        LCD_drawvBar(62, 83, 5, output[5]/2*40, WHITE, 40, RED);
+    }
+    else if(output[5]<0){
+        LCD_drawvBar(62, 83, 5, 0, WHITE, 40, RED);
+        LCD_drawvBar(62, 38, 5, 40+output[5]/2*40, RED, 40, WHITE);
     }
 
 
+//    for(i=0; i<7; i++){
+//        sprintf(msg, "Info %d: %7d",i, info[i]);
+//        LCD_drawString(10, 10*i+30, msg, WHITE, BLACK);
+//    }
+//    sprintf(msg, "Maxg: %7d", maxg);
+//    LCD_drawString(10, 100, msg, WHITE, BLACK);
+//    sprintf(msg, "Ming: %7d", ming);
+//    LCD_drawString(10, 110, msg, WHITE, BLACK);
 
 }
 

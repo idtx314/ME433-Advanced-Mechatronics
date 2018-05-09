@@ -69,7 +69,6 @@ uint8_t APP_MAKE_BUFFER_DMA_READY dataOut[APP_READ_BUFFER_SIZE];
 uint8_t APP_MAKE_BUFFER_DMA_READY readBuffer[APP_READ_BUFFER_SIZE];
 int len, i = 0;
 int startTime = 0; // to remember the loop time
-int blinkTime = 0;
 
 // *****************************************************************************
 /* Application Data
@@ -355,6 +354,12 @@ void APP_Initialize(void) {
     LCD_init();
     LCD_clearScreen(BLACK);
     
+    //Set up I2C
+    ANSELBbits.ANSB2 = 0;
+    ANSELBbits.ANSB3 = 0;
+    i2c_master_setup();
+    i2c_init_imu();
+    
     
 
     startTime = _CP0_GET_COUNT();
@@ -476,6 +481,8 @@ void APP_Tasks(void) {      //Setup is such that this is only called when the US
             /* PUT THE TEXT YOU WANT TO SEND TO THE COMPUTER IN dataOut
             AND REMEMBER THE NUMBER OF CHARACTERS IN len */
             /* THIS IS WHERE YOU CAN READ YOUR IMU, PRINT TO THE LCD, ETC */
+            
+            
             len = sprintf(dataOut, "%d\r\n", i);
             i++; // increment the index so we see a change in the text
             /* IF A LETTER WAS RECEIVED, ECHO IT BACK SO THE USER CAN SEE IT */
@@ -488,7 +495,8 @@ void APP_Tasks(void) {      //Setup is such that this is only called when the US
             /* ELSE SEND THE MESSAGE YOU WANTED TO SEND */
             else {
                 USB_DEVICE_CDC_Write(USB_DEVICE_CDC_INDEX_0,
-                        &appData.writeTransferHandle, dataOut, len,
+                        &appData.writeTransferHandle, 
+                        dataOut, len,
                         USB_DEVICE_CDC_TRANSFER_FLAGS_DATA_COMPLETE);
                 startTime = _CP0_GET_COUNT(); // reset the timer for acurate delays
             }
