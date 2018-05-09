@@ -1,5 +1,7 @@
 #include<xc.h>
 #include "i2clib.h"
+#include "ST7735.h"
+#include<stdio.h>
 
 /* I2C Master utilities, 400 kHz, using polling rather than interrupts
  * The functions must be callled in the correct order as per the I2C protocol
@@ -91,6 +93,69 @@ void i2c_init_imu(void){
     i2c_master_send(0b00010001);    //Register
     i2c_master_send(0b10001000);    //Settings
     i2c_master_stop();              //Stop
+}
+
+void imu_test(){
+    unsigned char data[14];
+    short info[7];
+    float output[7];
+    char msg[30];
+    int i;
+    char whoami[1];
+    float resolution[7] = {40, 1000, 1000, 1000, 2, 2, 2};
+    short maxg = 0,ming = 0;
+
+    //First IMU measure reg = 0x20
+    //length = 14
+
+    i2c_read_multiple(IMUADD, 0x0F, whoami, 1);
+
+    sprintf(msg, "I am: %d",whoami[0]);
+    LCD_drawString(10, 10, msg, WHITE, BLACK);
+
+    
+    i2c_read_multiple(IMUADD, 0x20, data, 14);
+
+    for(i=0; i<7; i++){
+        info[i] = (data[2*i+1])<<8 | (data[2*i]);
+    }
+    if(info[6] > maxg)
+        maxg = info[6];
+    if(info[6] < ming)
+        ming = info[6];
+
+    for(i=0; i<7; i++){
+        output[i] = (float)info[i] / 32767. * resolution[i];
+    }
+
+    //4 = x, 5=y, 6=z 40-output[4]/2*40
+    if(output[4]>0){
+        LCD_drawBar(22, 78, 5, 40, RED, 0, WHITE);
+        LCD_drawBar(67, 78, 5, output[4]/2*40, WHITE, 40, RED);
+    }
+    else if(output[4]<0){
+        LCD_drawBar(67, 78, 5, 0, WHITE, 40, RED);
+        LCD_drawBar(22, 78, 5, (unsigned short)(40+output[4]/2*40), RED, 40, WHITE);
+    }
+    if(output[5]>0){
+        LCD_drawvBar(62, 38, 5, 40, RED, 0, WHITE);
+        LCD_drawvBar(62, 83, 5, output[5]/2*40, WHITE, 40, RED);
+    }
+    else if(output[5]<0){
+        LCD_drawvBar(62, 83, 5, 0, WHITE, 40, RED);
+        LCD_drawvBar(62, 38, 5, 40+output[5]/2*40, RED, 40, WHITE);
+    }
+
+
+//    for(i=0; i<7; i++){
+//        sprintf(msg, "Info %d: %7d",i, info[i]);
+//        LCD_drawString(10, 10*i+30, msg, WHITE, BLACK);
+//    }
+//    sprintf(msg, "Maxg: %7d", maxg);
+//    LCD_drawString(10, 100, msg, WHITE, BLACK);
+//    sprintf(msg, "Ming: %7d", ming);
+//    LCD_drawString(10, 110, msg, WHITE, BLACK);
+
 }
 
 void i2c_init_expander(void){

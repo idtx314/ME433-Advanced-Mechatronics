@@ -373,16 +373,16 @@ void APP_Initialize(void) {
     See prototype in app.h.
  */
 
-void APP_Tasks(void) {      //Setup is such that this is only called when the USB is open(?))
+void APP_Tasks(void) {      //Setup is such that the switch is only called when the USB is open(?)
     /* Update the application state machine based
      * on the current state */
     
     char msg[30];
     static int counter = 1;
-    
-    sprintf(msg, "Iteration #%3d", counter);
-    LCD_drawString(10, 10, msg, WHITE, BLACK);
-    counter++;
+//    
+//    sprintf(msg, "Iteration #%3d", counter);
+//    LCD_drawString(10, 10, msg, WHITE, BLACK);
+//    counter++;
     
 //    LATAINV = 1<<4;
 //    while(_CP0_GET_COUNT() < startTime + 2400000)
@@ -438,6 +438,11 @@ void APP_Tasks(void) {      //Setup is such that this is only called when the US
                         /* YOU COULD PUT AN IF STATEMENT HERE TO DETERMINE WHICH LETTER
                         WAS RECEIVED (USUALLY IT IS THE NULL CHARACTER BECAUSE NOTHING WAS
                       TYPED) */
+                if(appData.readBuffer[0] == 'r'){
+                    sprintf(msg, "r count: %3d", counter);
+                    counter++;
+                    LCD_drawString(10,20, msg, WHITE, BLACK);
+                }
 
                 if (appData.readTransferHandle == USB_DEVICE_CDC_TRANSFER_HANDLE_INVALID) {
                     appData.state = APP_STATE_ERROR;
@@ -481,6 +486,7 @@ void APP_Tasks(void) {      //Setup is such that this is only called when the US
             /* PUT THE TEXT YOU WANT TO SEND TO THE COMPUTER IN dataOut
             AND REMEMBER THE NUMBER OF CHARACTERS IN len */
             /* THIS IS WHERE YOU CAN READ YOUR IMU, PRINT TO THE LCD, ETC */
+            imu_test();
             
             
             len = sprintf(dataOut, "%d\r\n", i);
