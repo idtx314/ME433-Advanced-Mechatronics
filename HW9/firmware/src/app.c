@@ -512,7 +512,7 @@ void APP_Tasks(void) {      //Setup is such that the switch is only called when 
 //            }
             
             
-            len = sprintf(dataOut, "%d\r\n", i);
+            len = sprintf(dataOut, "%5.4f\r\n", data[6]);
             i++; // increment the index so we see a change in the text
             /* IF A LETTER WAS RECEIVED, ECHO IT BACK SO THE USER CAN SEE IT */
             //TODO if flag, read, transmit, and increment counter
