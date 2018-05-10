@@ -69,7 +69,6 @@ uint8_t APP_MAKE_BUFFER_DMA_READY dataOut[APP_READ_BUFFER_SIZE];
 uint8_t APP_MAKE_BUFFER_DMA_READY readBuffer[APP_READ_BUFFER_SIZE];
 int len;
 int startTime = 0; // to remember the loop time
-int readTime = 0; // Time of last IMU read
 
 // *****************************************************************************
 /* Application Data
@@ -494,10 +493,7 @@ void APP_Tasks(void) {      //Setup is such that the switch is only called when 
             /* THIS IS WHERE YOU CAN READ YOUR IMU, PRINT TO THE LCD, ETC */
             if(flag){
             //If flag, read and increment counter
-                if (_CP0_GET_COUNT() - readTime > (48000000 / 2 / 5)){
-                    i2c_read_imu(data);
-                    readTime = _CP0_GET_COUNT();
-                }
+                i2c_read_imu(data);
 //                for(j=0; j<7; j++){
 //                    sprintf(msg, "Info %d: %7f",j, data[j]);
 //                    LCD_drawString(10, 10*j+30, msg, WHITE, BLACK);
