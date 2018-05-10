@@ -380,7 +380,7 @@ void APP_Tasks(void) {      //Setup is such that the switch is only called when 
     
     char msg[30];
     static float data[7] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-    static int counter = 0;
+    static int counter = 1;
     int j=0;
     static int flag = 0;
     
@@ -502,9 +502,9 @@ void APP_Tasks(void) {      //Setup is such that the switch is only called when 
                     sprintf(msg, "Info %d: %7f",j, data[j]);
                     LCD_drawString(10, 10*j+30, msg, WHITE, BLACK);
                 }
-                len = sprintf(dataOut, "%5.4f\r\n", data[6]);
+                len = sprintf(dataOut, "%d %5.4f %5.4f %5.4f %5.4f %5.4f %5.4f\r\n", counter, data[4], data[5], data[6], data[1], data[2], data[3]);
                 counter++;
-                if(counter > 99){
+                if(counter > 100){
                     flag = 0;
                     counter = 0;
                 }
