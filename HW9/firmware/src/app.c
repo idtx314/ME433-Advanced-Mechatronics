@@ -498,10 +498,10 @@ void APP_Tasks(void) {      //Setup is such that the switch is only called when 
                     i2c_read_imu(data);
                     readTime = _CP0_GET_COUNT();
                 }
-                for(j=0; j<7; j++){
-                    sprintf(msg, "Info %d: %7f",j, data[j]);
-                    LCD_drawString(10, 10*j+30, msg, WHITE, BLACK);
-                }
+//                for(j=0; j<7; j++){
+//                    sprintf(msg, "Info %d: %7f",j, data[j]);
+//                    LCD_drawString(10, 10*j+30, msg, WHITE, BLACK);
+//                }
                 len = sprintf(dataOut, "%d %5.4f %5.4f %5.4f %5.4f %5.4f %5.4f\r\n", counter, data[4], data[5], data[6], data[1], data[2], data[3]);
                 counter++;
                 if(counter > 100){
