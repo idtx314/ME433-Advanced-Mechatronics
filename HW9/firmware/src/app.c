@@ -380,8 +380,10 @@ void APP_Tasks(void) {      //Setup is such that the switch is only called when 
     
     char msg[30];
     static float data[7] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-    static int counter = 1;
+    static int counter = 0;
     int j=0;
+    static int flag = 0;
+    
 //    
 //    sprintf(msg, "Iteration #%3d", counter);
 //    LCD_drawString(10, 10, msg, WHITE, BLACK);
@@ -442,10 +444,11 @@ void APP_Tasks(void) {      //Setup is such that the switch is only called when 
                         WAS RECEIVED (USUALLY IT IS THE NULL CHARACTER BECAUSE NOTHING WAS
                       TYPED) */
                 if(appData.readBuffer[0] == 'r'){
-                    sprintf(msg, "r count: %3d", counter);
-                    counter++;
-                    LCD_drawString(10,20, msg, WHITE, BLACK);
+//                    sprintf(msg, "r count: %3d", counter);
+//                    counter++;
+//                    LCD_drawString(10,20, msg, WHITE, BLACK);
                     //TODO set a flag
+                    flag = 1;
                 }
 
                 if (appData.readTransferHandle == USB_DEVICE_CDC_TRANSFER_HANDLE_INVALID) {
@@ -466,7 +469,7 @@ void APP_Tasks(void) {      //Setup is such that the switch is only called when 
             /* Check if a character was received or a switch was pressed.
              * The isReadComplete flag gets updated in the CDC event handler. */
 
-             /* WAIT FOR 5HZ TO PASS OR UNTIL A LETTER IS RECEIVED */
+             /* WAIT FOR 100HZ TO PASS OR UNTIL A LETTER IS RECEIVED */
             if (appData.isReadComplete || _CP0_GET_COUNT() - startTime > (48000000 / 2 / 100)) {
                 appData.state = APP_STATE_SCHEDULE_WRITE;
             }
@@ -489,51 +492,50 @@ void APP_Tasks(void) {      //Setup is such that the switch is only called when 
             /* PUT THE TEXT YOU WANT TO SEND TO THE COMPUTER IN dataOut
             AND REMEMBER THE NUMBER OF CHARACTERS IN len */
             /* THIS IS WHERE YOU CAN READ YOUR IMU, PRINT TO THE LCD, ETC */
+            if(flag){
+            //If flag, read and increment counter
+                if (_CP0_GET_COUNT() - readTime > (48000000 / 2 / 5)){
+                    i2c_read_imu(data);
+                    readTime = _CP0_GET_COUNT();
+                }
+                for(j=0; j<7; j++){
+                    sprintf(msg, "Info %d: %7f",j, data[j]);
+                    LCD_drawString(10, 10*j+30, msg, WHITE, BLACK);
+                }
+                len = sprintf(dataOut, "%5.4f\r\n", data[6]);
+                counter++;
+                if(counter > 99){
+                    flag = 0;
+                    counter = 0;
+                }
+            }
+            else{
+                len = 1;
+                dataOut[0] = 0;
+            }
+//                if(data[4]<0){
+//                    LCD_drawBar(22, 78, 5, 40, RED, 0, WHITE);
+//                  LCD_drawBar(67, 78, 5, -data[4]/2*40, WHITE, 40, RED);
+//                }
+//                else if(data[4]>0){
+//                    LCD_drawBar(67, 78, 5, 0, WHITE, 40, RED);
+//                    LCD_drawBar(22, 78, 5, (unsigned short)(40-data[4]/2*40), RED, 40, WHITE);
+//              }
+//                if(data[5]<0){
+//                    LCD_drawvBar(62, 38, 5, 40, RED, 0, WHITE);
+//                    LCD_drawvBar(62, 83, 5, -data[5]/2*40, WHITE, 40, RED);
+//               }
+//                else if(data[5]>0){
+//                    LCD_drawvBar(62, 83, 5, 0, WHITE, 40, RED);
+//                    LCD_drawvBar(62, 38, 5, 40-data[5]/2*40, RED, 40, WHITE);
+//              }
             
-            if (_CP0_GET_COUNT() - readTime > (48000000 / 2 / 5)){
-                i2c_read_imu(data);
-                readTime = _CP0_GET_COUNT();
-            }
-            for(j=0; j<7; j++){
-                sprintf(msg, "Info %d: %7f",j, data[j]);
-                LCD_drawString(10, 10*j+30, msg, WHITE, BLACK);
-            }
-//            if(data[4]<0){
-//                LCD_drawBar(22, 78, 5, 40, RED, 0, WHITE);
-//                LCD_drawBar(67, 78, 5, -data[4]/2*40, WHITE, 40, RED);
-//            }
-//            else if(data[4]>0){
-//                LCD_drawBar(67, 78, 5, 0, WHITE, 40, RED);
-//                LCD_drawBar(22, 78, 5, (unsigned short)(40-data[4]/2*40), RED, 40, WHITE);
-//            }
-//            if(data[5]<0){
-//                LCD_drawvBar(62, 38, 5, 40, RED, 0, WHITE);
-//                LCD_drawvBar(62, 83, 5, -data[5]/2*40, WHITE, 40, RED);
-//            }
-//            else if(data[5]>0){
-//                LCD_drawvBar(62, 83, 5, 0, WHITE, 40, RED);
-//                LCD_drawvBar(62, 38, 5, 40-data[5]/2*40, RED, 40, WHITE);
-//            }
-            
-            
-            len = sprintf(dataOut, "%5.4f\r\n", data[6]);
-            i++; // increment the index so we see a change in the text
-            /* IF A LETTER WAS RECEIVED, ECHO IT BACK SO THE USER CAN SEE IT */
-            //TODO if flag, read, transmit, and increment counter
-            if (appData.isReadComplete) {
-                USB_DEVICE_CDC_Write(USB_DEVICE_CDC_INDEX_0,
-                        &appData.writeTransferHandle,
-                        appData.readBuffer, 1,
-                        USB_DEVICE_CDC_TRANSFER_FLAGS_DATA_COMPLETE);
-            }
-            /* ELSE SEND THE MESSAGE YOU WANTED TO SEND */
-            else {
-                USB_DEVICE_CDC_Write(USB_DEVICE_CDC_INDEX_0,
-                        &appData.writeTransferHandle, 
-                        dataOut, len,
-                        USB_DEVICE_CDC_TRANSFER_FLAGS_DATA_COMPLETE);
-                startTime = _CP0_GET_COUNT(); // reset the timer for acurate delays
-            }
+            /* SEND THE MESSAGE YOU WANTED TO SEND */
+            USB_DEVICE_CDC_Write(USB_DEVICE_CDC_INDEX_0,
+                    &appData.writeTransferHandle, 
+                    dataOut, len,
+                    USB_DEVICE_CDC_TRANSFER_FLAGS_DATA_COMPLETE);
+            startTime = _CP0_GET_COUNT(); // reset the timer for accurate delays
             //TODO if counter > 100, clear flag
             break;
 
