@@ -70,6 +70,8 @@ uint8_t APP_MAKE_BUFFER_DMA_READY readBuffer[APP_READ_BUFFER_SIZE];
 int len;
 int startTime = 0; // to remember the loop time
 
+#define FILTERMEM 4
+
 // *****************************************************************************
 /* Application Data
 
@@ -379,9 +381,23 @@ void APP_Tasks(void) {      //Setup is such that the switch is only called when 
     
     char msg[30];
     static float data[7] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-    static int counter = 1;
+    static float buffer[FILTERMEM], firweight[FILTERMEM] = {.25, .25, .25, .25}, iirweight[2] = {0.1, 0.9};
+    static float iir=0;
+    static int counter = 1, bufcounter;
     static int flag = 0;
+    int i;
+    float maf=0, fir=0;
     
+    // Zero the buffer
+    for(i=0; i<FILTERMEM; i++){
+        buffer[i] = 0;
+    }
+    
+    
+//    
+//    sprintf(msg, "Iteration #%3d", counter);
+//    LCD_drawString(10, 10, msg, WHITE, BLACK);
+//    counter++;
     
 //    LATAINV = 1<<4;
 //    while(_CP0_GET_COUNT() < startTime + 2400000)
@@ -488,9 +504,34 @@ void APP_Tasks(void) {      //Setup is such that the switch is only called when 
             if(flag){
             //If flag, read and increment counter
                 i2c_read_imu(data);
-                len = sprintf(dataOut, "%d, %5.4f, %5.4f, %5.4f, %5.4f, %5.4f, %5.4f\r\n", counter, data[4], data[5], data[6], data[1], data[2], data[3]);
+                
+                
+                buffer[bufcounter] = data[6];
+                bufcounter++;
+                if(bufcounter >= FILTERMEM)
+                    bufcounter = 0;
+                
+                // MAF
+                    // Sum the buffer
+                for(i=0; i<FILTERMEM; i++){
+                    maf = maf + buffer[i];                         
+                }
+                    // Average the buffer
+                maf = maf/FILTERMEM;
+                
+                // FIR
+                // TODO set this so the oldest element always gets the same weight
+                for(i=0; i<FILTERMEM; i++){
+                    fir = fir + (firweight[i] * buffer[i]);
+                }
+                
+                // IIR
+                iir = iirweight[0] * iir + iirweight[1] * data[6];
+                
+                len = sprintf(dataOut, "%5.4f, %5.4f, %5.4f, %5.4f\r\n", data[6], maf, iir, fir);
+//                len = sprintf(dataOut, "%d, %5.4f, %5.4f, %5.4f, %5.4f\r\n", counter, data[7], maf, iir, fir);
                 counter++;
-                if(counter > 100){
+                if(counter > 5){
                     flag = 0;
                     counter = 0;
                 }
@@ -499,6 +540,22 @@ void APP_Tasks(void) {      //Setup is such that the switch is only called when 
                 len = 1;
                 dataOut[0] = 0;
             }
+//                if(data[4]<0){
+//                    LCD_drawBar(22, 78, 5, 40, RED, 0, WHITE);
+//                  LCD_drawBar(67, 78, 5, -data[4]/2*40, WHITE, 40, RED);
+//                }
+//                else if(data[4]>0){
+//                    LCD_drawBar(67, 78, 5, 0, WHITE, 40, RED);
+//                    LCD_drawBar(22, 78, 5, (unsigned short)(40-data[4]/2*40), RED, 40, WHITE);
+//              }
+//                if(data[5]<0){
+//                    LCD_drawvBar(62, 38, 5, 40, RED, 0, WHITE);
+//                    LCD_drawvBar(62, 83, 5, -data[5]/2*40, WHITE, 40, RED);
+//               }
+//                else if(data[5]>0){
+//                    LCD_drawvBar(62, 83, 5, 0, WHITE, 40, RED);
+//                    LCD_drawvBar(62, 38, 5, 40-data[5]/2*40, RED, 40, WHITE);
+//              }
             
             /* SEND THE MESSAGE YOU WANTED TO SEND */
             USB_DEVICE_CDC_Write(USB_DEVICE_CDC_INDEX_0,
