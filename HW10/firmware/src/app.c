@@ -381,16 +381,18 @@ void APP_Tasks(void) {      //Setup is such that the switch is only called when 
     
     char msg[30];
     static float data[7] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-    static float buffer[FILTERMEM], firweight[FILTERMEM] = {.25, .25, .25, .25}, iirweight[2] = {0.1, 0.9};
+    static float buffer[FILTERMEM], firweight[FILTERMEM] = {.0467, .4533, .4533, .0467}, iirweight[2] = {0.1, 0.9};
     static float iir=0;
-    static int counter = 1, bufcounter;
+    static int counter = 1, bufcounter=0;
     static int flag = 0;
     int i;
     float maf=0, fir=0;
     
     // Zero the buffer
-    for(i=0; i<FILTERMEM; i++){
-        buffer[i] = 0;
+    if(counter == 1){
+        for(i=0; i<FILTERMEM; i++){
+            buffer[i] = 0;
+        }
     }
     
     
@@ -529,9 +531,9 @@ void APP_Tasks(void) {      //Setup is such that the switch is only called when 
                 iir = iirweight[0] * iir + iirweight[1] * data[6];
                 
                 len = sprintf(dataOut, "%5.4f, %5.4f, %5.4f, %5.4f\r\n", data[6], maf, iir, fir);
-//                len = sprintf(dataOut, "%d, %5.4f, %5.4f, %5.4f, %5.4f\r\n", counter, data[7], maf, iir, fir);
+//                len = sprintf(dataOut, "%d, %5.4f, %5.4f, %5.4f, %5.4f\r\n", counter, data[6], maf, iir, fir);
                 counter++;
-                if(counter > 5){
+                if(counter > 100){
                     flag = 0;
                     counter = 0;
                 }
