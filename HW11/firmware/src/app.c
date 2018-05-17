@@ -337,12 +337,8 @@ void APP_Tasks(void) {
             appData.mouseButton[0] = MOUSE_BUTTON_STATE_RELEASED;
             appData.mouseButton[1] = MOUSE_BUTTON_STATE_RELEASED;
             
-            if(inc >= 50 /*0, 255*/){
+            if(inc >= 250 /*0, 255*/){
                 i2c_read_imu(data);  //Use 4 for x, 5 for y
-                sprintf(msg, "x accel: %7.5f", (int8_t) (data[4]/2.0 * 10.0));
-                LCD_drawString(10,10,msg,WHITE,BLACK);
-                sprintf(msg, "y accel: %7.5f", (int8_t) (data[5]/2.0 * 10.0));
-                LCD_drawString(10,20,msg,WHITE,BLACK);
                 appData.xCoordinate = (int8_t) (data[4]/2.0 * 10.0);
                 appData.yCoordinate = (int8_t) (data[5]/2.0 * 10.0);
                 inc = 0;
