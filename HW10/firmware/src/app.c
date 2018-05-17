@@ -70,7 +70,7 @@ uint8_t APP_MAKE_BUFFER_DMA_READY readBuffer[APP_READ_BUFFER_SIZE];
 int len;
 int startTime = 0; // to remember the loop time
 
-#define FILTERMEM 4
+#define FILTERMEM 8
 
 // *****************************************************************************
 /* Application Data
@@ -381,9 +381,9 @@ void APP_Tasks(void) {      //Setup is such that the switch is only called when 
     
     char msg[30];
     static float data[7] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-    static float buffer[FILTERMEM], firweight[FILTERMEM] = {.0467, .4533, .4533, .0467}, iirweight[2] = {0.1, 0.9};
+    static float buffer[FILTERMEM], firweight[FILTERMEM] = {.0174, .0612, .1662, .2552, .2552, .1662, .0612, .0174}, iirweight[2] = {0.8, 0.2};
     static float iir=0;
-    static int counter = 1, bufcounter=0;
+    static int counter = 1;
     static int flag = 0;
     int i;
     float maf=0, fir=0;
@@ -507,22 +507,19 @@ void APP_Tasks(void) {      //Setup is such that the switch is only called when 
             //If flag, read and increment counter
                 i2c_read_imu(data);
                 
-                
-                buffer[bufcounter] = data[6];
-                bufcounter++;
-                if(bufcounter >= FILTERMEM)
-                    bufcounter = 0;
+                for(i=0; i<FILTERMEM-1; i++){
+                    buffer[i] = buffer[i+1];
+                }
+                buffer[7] = data[6];
                 
                 // MAF
                     // Sum the buffer
                 for(i=0; i<FILTERMEM; i++){
-                    maf = maf + buffer[i];                         
+                    maf = maf + 1.0/FILTERMEM * buffer[i];                         
                 }
-                    // Average the buffer
-                maf = maf/FILTERMEM;
                 
                 // FIR
-                // TODO set this so the oldest element always gets the same weight
+//                 TODO set this so the oldest element always gets the same weight
                 for(i=0; i<FILTERMEM; i++){
                     fir = fir + (firweight[i] * buffer[i]);
                 }
@@ -530,12 +527,11 @@ void APP_Tasks(void) {      //Setup is such that the switch is only called when 
                 // IIR
                 iir = iirweight[0] * iir + iirweight[1] * data[6];
                 
-                len = sprintf(dataOut, "%5.4f, %5.4f, %5.4f, %5.4f\r\n", data[6], maf, iir, fir);
-//                len = sprintf(dataOut, "%d, %5.4f, %5.4f, %5.4f, %5.4f\r\n", counter, data[6], maf, iir, fir);
+                len = sprintf(dataOut, "%d, %5.4f, %5.4f, %5.4f, %5.4f\r\n", counter, data[6], maf, iir, fir);
                 counter++;
                 if(counter > 100){
                     flag = 0;
-                    counter = 0;
+                    counter = 1;
                 }
             }
             else{
