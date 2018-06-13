@@ -3,7 +3,7 @@
 
 // Includes
 #include<xc.h>           // processor SFR definitions
-#include<sys/attribs.h>  // __ISR macro   Don't seem to need this
+#include<sys/attribs.h>  // __ISR macro
 
 // Constants
 #define MAX_PWM 100
@@ -28,24 +28,24 @@ int l_d_vel=0, r_d_vel=0;     // Desired velocities
 
 /* TODO
     Add the right wheel to ISR
-
+    Get interrupt function into system_interrupt.c (in Source Files -> app -> system_config -> default -> framework)
 */
 
 
 
-// Interrupt Service Routine running at 500Hz
+// Interrupt Service Routine
 void __ISR(_TIMER_4_VECTOR, IPL4SOFT) Timer4ISR(void)
 {
     // Local Variables
-    static int l_prev_count=0, l_eint=0;
-    int l_count, l_vel, l_error, l_d_pwm;
+    static int l_prev_count, l_eint;
+    int l_count, l_vel, l_error, l_d_pwm
 
 
-    // Get encoder count
-    l_count = TMR5;
+    // Get encoder count?
+    l_count = TMR?;
 
     // Calculate average wheel speed since last interrupt
-    l_vel = (l_count - l_prev_count) * 500; //Multiply by large number instead of dividing by small
+    l_vel = (l_count - l_prev_count) / time period?; //Multiply by large number instead of dividing by small
 
 
     // Perform PI control
@@ -91,6 +91,7 @@ int main()
 
     // Deactivate Interrupts
     __builtin_disable_interrupts();
+        // Initialize microcontroller (OC pins, AN pins, LED and button pins)
     // Init OC pins
     // OC1 for left wheel, OC4 for right wheel
     RPA0Rbits.RPA0R = 0b0101; // A0 to OC1
