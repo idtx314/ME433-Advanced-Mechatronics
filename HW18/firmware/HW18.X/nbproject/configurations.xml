@@ -11,17 +11,17 @@
               <logicalFolder name="f1" displayName="system" projectFiles="true">
                 <logicalFolder name="f1" displayName="devcon" projectFiles="true">
                   <logicalFolder name="f1" displayName="src" projectFiles="true">
-                    <itemPath>../../../HW14/firmware/src/system_config/default/framework/system/devcon/src/sys_devcon_local.h</itemPath>
+                    <itemPath>../src/system_config/default/framework/system/devcon/src/sys_devcon_local.h</itemPath>
                   </logicalFolder>
-                  <itemPath>../../../HW14/firmware/src/system_config/default/framework/system/devcon/sys_devcon.h</itemPath>
+                  <itemPath>../src/system_config/default/framework/system/devcon/sys_devcon.h</itemPath>
                 </logicalFolder>
               </logicalFolder>
             </logicalFolder>
-            <itemPath>../../../HW14/firmware/src/system_config/default/system_config.h</itemPath>
-            <itemPath>../../../HW14/firmware/src/system_config/default/system_definitions.h</itemPath>
+            <itemPath>../src/system_config/default/system_config.h</itemPath>
+            <itemPath>../src/system_config/default/system_definitions.h</itemPath>
           </logicalFolder>
         </logicalFolder>
-        <itemPath>../../../HW14/firmware/src/app.h</itemPath>
+        <itemPath>../src/app.h</itemPath>
       </logicalFolder>
       <logicalFolder name="f1" displayName="framework" projectFiles="true">
         <logicalFolder name="f1" displayName="driver" projectFiles="true">
@@ -110,30 +110,30 @@
               <logicalFolder name="f1" displayName="system" projectFiles="true">
                 <logicalFolder name="f1" displayName="clk" projectFiles="true">
                   <logicalFolder name="f1" displayName="src" projectFiles="true">
-                    <itemPath>../../../HW14/firmware/src/system_config/default/framework/system/clk/src/sys_clk_pic32mx.c</itemPath>
+                    <itemPath>../src/system_config/default/framework/system/clk/src/sys_clk_pic32mx.c</itemPath>
                   </logicalFolder>
                 </logicalFolder>
                 <logicalFolder name="f2" displayName="devcon" projectFiles="true">
                   <logicalFolder name="f1" displayName="src" projectFiles="true">
-                    <itemPath>../../../HW14/firmware/src/system_config/default/framework/system/devcon/src/sys_devcon.c</itemPath>
-                    <itemPath>../../../HW14/firmware/src/system_config/default/framework/system/devcon/src/sys_devcon_pic32mx.c</itemPath>
+                    <itemPath>../src/system_config/default/framework/system/devcon/src/sys_devcon.c</itemPath>
+                    <itemPath>../src/system_config/default/framework/system/devcon/src/sys_devcon_pic32mx.c</itemPath>
                   </logicalFolder>
                 </logicalFolder>
                 <logicalFolder name="f3" displayName="ports" projectFiles="true">
                   <logicalFolder name="f1" displayName="src" projectFiles="true">
-                    <itemPath>../../../HW14/firmware/src/system_config/default/framework/system/ports/src/sys_ports_static.c</itemPath>
+                    <itemPath>../src/system_config/default/framework/system/ports/src/sys_ports_static.c</itemPath>
                   </logicalFolder>
                 </logicalFolder>
               </logicalFolder>
             </logicalFolder>
-            <itemPath>../../../HW14/firmware/src/system_config/default/system_init.c</itemPath>
-            <itemPath>../../../HW14/firmware/src/system_config/default/system_interrupt.c</itemPath>
-            <itemPath>../../../HW14/firmware/src/system_config/default/system_exceptions.c</itemPath>
-            <itemPath>../../../HW14/firmware/src/system_config/default/system_tasks.c</itemPath>
+            <itemPath>../src/system_config/default/system_init.c</itemPath>
+            <itemPath>../src/system_config/default/system_interrupt.c</itemPath>
+            <itemPath>../src/system_config/default/system_exceptions.c</itemPath>
+            <itemPath>../src/system_config/default/system_tasks.c</itemPath>
           </logicalFolder>
         </logicalFolder>
-        <itemPath>../../../HW14/firmware/src/app.c</itemPath>
-        <itemPath>../../../HW14/firmware/src/main.c</itemPath>
+        <itemPath>../src/app.c</itemPath>
+        <itemPath>../src/main.c</itemPath>
       </logicalFolder>
       <logicalFolder name="f1" displayName="framework" projectFiles="true">
         <logicalFolder name="f2" displayName="driver" projectFiles="true">
@@ -188,8 +188,8 @@
         <targetPluginBoard></targetPluginBoard>
         <platformTool>PICkit3PlatformTool</platformTool>
         <languageToolchain>XC32</languageToolchain>
-        <languageToolchainVersion>2.05</languageToolchainVersion>
-        <platform>2</platform>
+        <languageToolchainVersion>1.42</languageToolchainVersion>
+        <platform>3</platform>
       </toolsSet>
       <compileType>
         <linkerTool>

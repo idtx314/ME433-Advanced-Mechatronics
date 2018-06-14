@@ -67,10 +67,6 @@ uint8_t APP_MAKE_BUFFER_DMA_READY dataOut[APP_READ_BUFFER_SIZE];
 uint8_t APP_MAKE_BUFFER_DMA_READY readBuffer[APP_READ_BUFFER_SIZE];
 int len, i = 0;
 int startTime = 0; // to remember the loop time
-char rx[64]; // the raw data
-int rxPos = 0; // how much data has been stored
-int gotRx = 0; // the flag
-int rxVal = 0; // a place to store the int that was received
 
 // *****************************************************************************
 /* Application Data
@@ -223,7 +219,7 @@ void APP_USBDeviceEventHandler(USB_DEVICE_EVENT event, void * eventData, uintptr
 
         case USB_DEVICE_EVENT_CONFIGURED:
 
-            /* Check the configuration. We only support configuration 1 */
+            /* Check the configuratio. We only support configuration 1 */
             configuredEventData = (USB_DEVICE_EVENT_DATA_CONFIGURED*) eventData;
             if (configuredEventData->configurationValue == 1) {
                 /* Update LED to show configured state */
@@ -401,32 +397,16 @@ void APP_Tasks(void) {
             if (appData.isReadComplete == true) {
                 appData.isReadComplete = false;
                 appData.readTransferHandle = USB_DEVICE_CDC_TRANSFER_HANDLE_INVALID;
-                
-                
 
                 USB_DEVICE_CDC_Read(USB_DEVICE_CDC_INDEX_0,
                         &appData.readTransferHandle, appData.readBuffer,
                         APP_READ_BUFFER_SIZE);
 
-                int ii = 0;
-                // loop thru the characters in the buffer
-                while (appData.readBuffer[ii] != 0) {
-                    // if you got a newline
-                    if (appData.readBuffer[ii] == '\n' || appData.readBuffer[ii] == '\r') {
-                        rx[rxPos] = 0; // end the array
-                        // TODO, change this scan to expect a tuple of ints. Prep a new variable to hold.
-                        sscanf(rx, "%d", &rxVal); // scan the received buffer for an int
-                        gotRx = 1; // set the flag
-                        break; // get out of the while loop
-                    } else if (appData.readBuffer[ii] == 0) {
-                        break; // there was no newline, get out of the while loop
-                    } else {
-                        // save the character into the array
-                        rx[rxPos] = appData.readBuffer[ii];
-                        rxPos++;
-                        ii++;
-                    }
-                }
+                        /* AT THIS POINT, appData.readBuffer[0] CONTAINS A LETTER
+                        THAT WAS SENT FROM THE COMPUTER */
+                        /* YOU COULD PUT AN IF STATEMENT HERE TO DETERMINE WHICH LETTER
+                        WAS RECEIVED (USUALLY IT IS THE NULL CHARACTER BECAUSE NOTHING WAS
+                      TYPED) */
 
                 if (appData.readTransferHandle == USB_DEVICE_CDC_TRANSFER_HANDLE_INVALID) {
                     appData.state = APP_STATE_ERROR;
@@ -446,8 +426,8 @@ void APP_Tasks(void) {
             /* Check if a character was received or a switch was pressed.
              * The isReadComplete flag gets updated in the CDC event handler. */
 
-             /* WAIT FOR 5HZ TO PASS OR UNTIL STRING IS RECEIVED */
-            if (gotRx || _CP0_GET_COUNT() - startTime > (48000000 / 2 / 5)) {
+             /* WAIT FOR 5HZ TO PASS OR UNTIL A LETTER IS RECEIVED */
+            if (appData.isReadComplete || _CP0_GET_COUNT() - startTime > (48000000 / 2 / 5)) {
                 appData.state = APP_STATE_SCHEDULE_WRITE;
             }
 
@@ -470,23 +450,21 @@ void APP_Tasks(void) {
             /* PUT THE TEXT YOU WANT TO SEND TO THE COMPUTER IN dataOut
             AND REMEMBER THE NUMBER OF CHARACTERS IN len */
             /* THIS IS WHERE YOU CAN READ YOUR IMU, PRINT TO THE LCD, ETC */
-             if (gotRx) {
-                 // TODO Reformat this to echo coordinates for confirmation
-                len = sprintf(dataOut, "got: %d\r\n", rxVal);
-                i++;
+            len = sprintf(dataOut, "%d\r\n", i);
+            i++; // increment the index so we see a change in the text
+            /* IF A LETTER WAS RECEIVED, ECHO IT BACK SO THE USER CAN SEE IT */
+            if (appData.isReadComplete) {
                 USB_DEVICE_CDC_Write(USB_DEVICE_CDC_INDEX_0,
                         &appData.writeTransferHandle,
-                        dataOut, len,
+                        appData.readBuffer, 1,
                         USB_DEVICE_CDC_TRANSFER_FLAGS_DATA_COMPLETE);
-                rxPos = 0;
-                gotRx = 0;
-            } else {
-                len = sprintf(dataOut, "%d\r\n", i);
-                i++;
+            }
+            /* ELSE SEND THE MESSAGE YOU WANTED TO SEND */
+            else {
                 USB_DEVICE_CDC_Write(USB_DEVICE_CDC_INDEX_0,
                         &appData.writeTransferHandle, dataOut, len,
                         USB_DEVICE_CDC_TRANSFER_FLAGS_DATA_COMPLETE);
-                startTime = _CP0_GET_COUNT();
+                startTime = _CP0_GET_COUNT(); // reset the timer for acurate delays
             }
             break;
 

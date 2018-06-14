@@ -389,6 +389,7 @@ void APP_Initialize(void) {
 
     startTime = _CP0_GET_COUNT();
     
+    // TODO: Remove this
     l_d_vel = r_d_vel = 10;
 }
 
