@@ -63,6 +63,16 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "app.h"
 #include "system_definitions.h"
 
+// Constants
+#define MAX_PWM 100
+#define MIN_PWM 0
+#define MAX_E_CAP 500
+#define MIN_E_CAP 500
+#define L_KP 1
+#define R_KP 1
+#define L_KI 1
+#define R_KI 1
+
 // *****************************************************************************
 // *****************************************************************************
 // Section: System Interrupt Vector Functions
@@ -73,6 +83,71 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 void __ISR(_USB_1_VECTOR, ipl4AUTO) _IntHandlerUSBInstance0(void)
 {
     DRV_USBFS_Tasks_ISR(sysObj.drvUSBObject);
+}
+
+void __ISR(_TIMER_4_VECTOR, IPL4SOFT) Timer4ISR(void){
+    // Local Variables
+    static int l_prev_count = 0, r_prev_count = 0;
+    static int l_eint = 0, r_eint=0;
+    int l_count, r_count, l_vel, r_vel, l_error, r_error, l_d_pwm, r_d_pwm;
+
+
+    // Get encoder count
+    l_count = TMR5;
+    r_count = TMR3;
+
+    // Calculate average wheel speed since last interrupt
+    //Multiply by large number instead of dividing by small
+    l_vel = (l_count - l_prev_count) * 500;
+    r_vel = (r_count - r_prev_count) * 500;
+
+
+    // Perform PI control
+        // Calculate error
+        // Negative if velocity too high, positive if too low
+    l_error = l_d_vel - l_vel;
+    r_error = r_d_vel - r_vel;
+
+        // Calculate integrated error
+    l_eint += l_error;
+    r_eint += r_error;
+            // Cap integrated error
+    if(l_eint > MAX_E_CAP)
+        l_eint = MAX_E_CAP;
+    else if(l_eint < MIN_E_CAP)
+        l_eint = MIN_E_CAP;
+    if(r_eint > MAX_E_CAP)
+        r_eint = MAX_E_CAP;
+    else if(r_eint < MIN_E_CAP)
+        r_eint = MIN_E_CAP;
+
+        // Calculate desired PWM
+    l_d_pwm = L_KP *l_error + L_KI *l_eint;
+    r_d_pwm = R_KP *r_error + R_KI * r_eint;
+
+        // Cap desired value to range
+    if(l_d_pwm > MAX_PWM)
+        l_d_pwm = MAX_PWM;
+    else if(l_d_pwm < MIN_PWM)
+        l_d_pwm = MIN_PWM;
+    if(r_d_pwm > MAX_PWM)
+        r_d_pwm = MAX_PWM;
+    else if(r_d_pwm < MIN_PWM)
+        r_d_pwm = MIN_PWM;
+
+    // Set duty cycle based on controller output
+        // Set OCxRS = Duty% * (PRx +1)/100;
+    OC1RS = l_d_pwm * (PR2 + 1) /100;
+    OC4RS = r_d_pwm * (PR2 + 1) /100;
+
+
+
+    // Save the new counts
+    l_prev_count = l_count;
+    r_prev_count = r_count;
+
+    // Clear Flag
+    IFS0bits.T4IF = 0;
 }
 
 /*******************************************************************************

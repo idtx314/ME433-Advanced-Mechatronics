@@ -83,6 +83,8 @@ extern "C" {
     This enumeration defines the valid application states.  These states
     determine the behavior of the application at various times.
 */
+    
+int l_d_vel=0, r_d_vel=0;     // Desired velocities
 
 typedef enum
 {

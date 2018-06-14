@@ -341,8 +341,56 @@ void APP_Initialize(void) {
     appData.readBuffer = &readBuffer[0];
 
     /* PUT YOUR LCD, IMU, AND PIN INITIALIZATIONS HERE */
+    // Init OC pins
+    // OC1 for left wheel, OC4 for right wheel
+    RPA0Rbits.RPA0R = 0b0101; // A0 to OC1
+    RPB13Rbits.RPB13R = 0b0101; // B13 to OC4
+    OC1CONbits.OCM = 0b110; // PWM mode without fault pin; other OCxCON bits are defaults
+    OC1RS = 0; // duty cycle
+    OC1R = 0; // initialize before turning OC1 on; afterward it is read-only
+    OC4CONbits.OCM = 0b110; // PWM mode without fault pin; other OCxCON bits are defaults
+    OC4RS = 0; // duty cycle
+    OC4R = 0; // initialize before turning OC4 on; afterward it is read-only
+
+    // Configure timers
+    // Timer 2 for PWM base frequency
+    T2CONbits.TCKPS = 0; // Timer2 prescaler N=1 (1:1)
+    PR2 = 2399; // 48000000 Hz / 20000 Hz / 1 - 1 = 2399 (20kHz PWM from 48MHz clock with 1:1 prescaler)
+    TMR2 = 0; // initial TMR2 count is 0
+
+    // Timer 5 for left encoder, Timer 3 for right encoder
+    T5CKRbits.T5CKR = 0b0100; // B9 is read by T5CK
+    T5CONbits.TCS = 1; // count external pulses
+    PR5 = 0xFFFF; // enable counting to max value of 2^16 - 1
+    TMR5 = 0; // set the timer count to zero
+    T3CKRbits.T3CKR = 0b0100; // B8 is read by T3CK
+    T3CONbits.TCS = 1; // count external pulses
+    PR3 = 0xFFFF; // enable counting to max value of 2^16 - 1
+    TMR3 = 0; // set the timer count to zero
+
+    // Timer 4 for the controller interrupt
+    T4CONbits.TCKPS = 2; // Timer4 prescaler N=4
+    PR4 = 23999; // 48000000 Hz / 500 Hz / 4 - 1 = 23999 (500Hz from 48MHz clock with 4:1 prescaler)
+    TMR4 = 0; // initial TMR4 count is 0
+
+        // Init interrupts
+    IPC4bits.T4IP = 4; // priority for Timer 4
+    IFS0bits.T4IF = 0; // clear interrupt flag for Timer4
+
+        // Enable everything
+    T2CONbits.ON = 1; // turn on Timer2
+    T3CONbits.ON = 1; // turn Timer on and start counting
+    T5CONbits.ON = 1; // turn Timer on and start counting
+    T4CONbits.ON = 1;
+    OC1CONbits.ON = 1; // turn on OC1
+    OC4CONbits.ON = 1; // turn on OC4
+    IEC0bits.T4IE = 1; // enable interrupt for Timer4
+    
 
     startTime = _CP0_GET_COUNT();
+    
+    // TODO: Remove this
+    l_d_vel = r_d_vel = 10;
 }
 
 /******************************************************************************
