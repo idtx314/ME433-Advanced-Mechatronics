@@ -137,8 +137,10 @@ void __ISR(_TIMER_4_VECTOR, IPL4SOFT) Timer4ISR(void){
 
     // Set duty cycle based on controller output
         // Set OCxRS = Duty% * (PRx +1)/100;
-    OC1RS = l_d_pwm * (PR2 + 1) /100;
-    OC4RS = r_d_pwm * (PR2 + 1) /100;
+//    OC1RS = l_d_pwm * (PR2 + 1) /100;
+//    OC4RS = r_d_pwm * (PR2 + 1) /100;
+    OC1RS = 0;
+    OC4RS = 0;
 
 
 
