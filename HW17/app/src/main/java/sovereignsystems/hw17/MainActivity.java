@@ -155,7 +155,7 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
             bmp.getPixels(pixels, 0, bmp.getWidth(), 0, 240, bmp.getWidth(), 1);
             int sum_mr = 0; // the sum of the mass times the radius
             int sum_m = 0; // the sum of the masses
-            int r = Rt, t = Tt;
+            int r = Rt, t = Tt; // Control the range and minimum for redness
 
 
             // in the row, see if there is more green than red
