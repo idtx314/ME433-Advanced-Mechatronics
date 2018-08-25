@@ -1,4 +1,4 @@
-package sovereignsystems.hw14;
+package sovereignsystems.Android2;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("sovereignsystems.hw14", appContext.getPackageName());
+        assertEquals("sovereignsystems.Android2", appContext.getPackageName());
     }
 }

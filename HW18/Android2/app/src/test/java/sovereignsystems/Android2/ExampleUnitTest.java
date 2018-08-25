@@ -1,4 +1,4 @@
-package sovereignsystems.hw14;
+package sovereignsystems.Android2;
 
 import org.junit.Test;
 
