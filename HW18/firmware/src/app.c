@@ -394,7 +394,7 @@ void APP_Initialize(void) {
     startTime = _CP0_GET_COUNT();
     
     // TODO: Remove this
-    l_d_vel = r_d_vel = 0;
+    l_d_vel = r_d_vel = 10;
 }
 
 /******************************************************************************
@@ -518,12 +518,14 @@ void APP_Tasks(void) {
             /* THIS IS WHERE YOU CAN READ YOUR IMU, PRINT TO THE LCD, ETC */
              if (gotRx) {
                  // TODO Reformat this to echo coordinates for confirmation
+                 // TODO make sure sending extra characters is fine.
                 len = sprintf(dataOut, "got: %d\r\n", rxVal);
                 i++;
                 USB_DEVICE_CDC_Write(USB_DEVICE_CDC_INDEX_0,
                         &appData.writeTransferHandle,
                         dataOut, len,
                         USB_DEVICE_CDC_TRANSFER_FLAGS_DATA_COMPLETE);
+                //TODO Move this to the receive completion statement
                 rxPos = 0;
                 gotRx = 0;
             } else {

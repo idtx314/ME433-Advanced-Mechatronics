@@ -512,7 +512,7 @@ void APP_Tasks(void) {
                 USB_DEVICE_CDC_Write(USB_DEVICE_CDC_INDEX_0,
                         &appData.writeTransferHandle, dataOut, len,
                         USB_DEVICE_CDC_TRANSFER_FLAGS_DATA_COMPLETE);
-                startTime = _CP0_GET_COUNT(); // reset the timer for acurate delays
+                startTime = _CP0_GET_COUNT(); // reset the timer for accurate delays
             }
             break;
 
