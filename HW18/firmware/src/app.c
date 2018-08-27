@@ -69,8 +69,13 @@ int len, i = 0;
 int startTime = 0; // to remember the loop time
 char rx[64]; // the raw data
 int rxPos = 0; // how much data has been stored
-int gotRx = 0; // the flag
+int gotRx = 0; // the receive flag
 int rxVal = 0; // a place to store the int that was received
+
+#define MAX_VEL 10
+#define MIN_VEL 0
+#define L_KP 1
+#define R_KP 1
 
 // *****************************************************************************
 /* Application Data
@@ -392,9 +397,6 @@ void APP_Initialize(void) {
     
 
     startTime = _CP0_GET_COUNT();
-    
-    // TODO: Remove this
-    l_d_vel = r_d_vel = 10;
 }
 
 /******************************************************************************
@@ -408,6 +410,8 @@ void APP_Initialize(void) {
 void APP_Tasks(void) {
     /* Update the application state machine based
      * on the current state */
+    
+    
 
     switch (appData.state) {
         case APP_STATE_INIT:
@@ -461,8 +465,31 @@ void APP_Tasks(void) {
                     if (appData.readBuffer[ii] == '\n' || appData.readBuffer[ii] == '\r') {
                         rx[rxPos] = 0; // end the array
                         // TODO, change this scan to expect a tuple of ints. Prep a new variable to hold.
-                        sscanf(rx, "%d", &rxVal); // scan the received buffer for an int
+                        sscanf(rx, "%d", &rxVal); // scan the received buffer for an int, store in rxVal
                         gotRx = 1; // set the flag
+                        
+                        //Perform CoM Calculation
+                        int error = rxVal - 240;        //Determine how far from center CoM is
+                        
+                        //If left
+                        if(error<0) {
+                            //slow left wheel
+                            error = -error;
+                            l_d_vel = MAX_VEL - L_KP * error;
+                            r_d_vel = MAX_VEL;
+                            if (l_d_vel < MIN_VEL)
+                                l_d_vel = MIN_VEL;
+                        }
+                        //if right
+                        else {
+                            //slow right wheel
+                            r_d_vel = MAX_VEL - R_KP * error;
+                            l_d_vel = MAX_VEL;
+                            if (r_d_vel < MIN_VEL)
+                                r_d_vel = MIN_VEL;
+                        
+                        }
+                        
                         break; // get out of the while loop
                     } else if (appData.readBuffer[ii] == 0) {
                         break; // there was no newline, get out of the while loop
@@ -519,7 +546,7 @@ void APP_Tasks(void) {
              if (gotRx) {
                  // TODO Reformat this to echo coordinates for confirmation
                  // TODO make sure sending extra characters is fine.
-                len = sprintf(dataOut, "got: %d\r\n", rxVal);
+                len = sprintf(dataOut, "CoM: %d\tLV: %d\tRV: %d\r\n", rxVal,l_d_vel,r_d_vel);
                 i++;
                 USB_DEVICE_CDC_Write(USB_DEVICE_CDC_INDEX_0,
                         &appData.writeTransferHandle,
