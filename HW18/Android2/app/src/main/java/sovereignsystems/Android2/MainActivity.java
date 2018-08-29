@@ -356,6 +356,12 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
             // only use the data if there were a few pixels identified, otherwise you might get a divide by 0 error
             if(sum_m>5){
                 COM = sum_mr / sum_m;
+                String sendString = String.valueOf(COM) + '\n';
+                try {
+                    sPort.write(sendString.getBytes(), 10); // 10 is the timeout
+                } catch (IOException e) { }
+                //TODO add limiter to prevent comms at faster than 5 Hz?
+                //TODO The PIC counts at 5hz, but it can ostensibly accept transmissions at any speed.
             }
             else{
                 COM = 0;
