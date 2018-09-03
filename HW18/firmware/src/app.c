@@ -72,7 +72,7 @@ int rxPos = 0; // how much data has been stored
 int gotRx = 0; // the receive flag
 int rxVal = 0; // a place to store the int that was received
 
-#define MAX_VEL 10
+#define MAX_VEL 50
 #define MIN_VEL 0
 #define L_KP 1
 #define R_KP 1

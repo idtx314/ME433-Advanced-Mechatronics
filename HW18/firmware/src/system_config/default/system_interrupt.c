@@ -67,7 +67,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #define MAX_PWM 100
 #define MIN_PWM 0
 #define MAX_E_CAP 500
-#define MIN_E_CAP 500
+#define MIN_E_CAP -500
 #define L_KP 1
 #define R_KP 1
 #define L_KI 1
@@ -137,10 +137,10 @@ void __ISR(_TIMER_4_VECTOR, IPL4SOFT) Timer4ISR(void){
 
     // Set duty cycle based on controller output
         // Set OCxRS = Duty% * (PRx +1)/100;
-//    OC1RS = l_d_pwm * (PR2 + 1) /100;
-//    OC4RS = r_d_pwm * (PR2 + 1) /100;
-    OC1RS = 0;
-    OC4RS = 0;
+    OC1RS = l_d_pwm * (PR2 + 1) /100;
+    OC4RS = r_d_pwm * (PR2 + 1) /100;
+//    OC1RS = 2000;
+//    OC4RS = 2000;
 
 
 
