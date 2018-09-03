@@ -544,8 +544,7 @@ void APP_Tasks(void) {
             AND REMEMBER THE NUMBER OF CHARACTERS IN len */
             /* THIS IS WHERE YOU CAN READ YOUR IMU, PRINT TO THE LCD, ETC */
              if (gotRx) {
-                 // TODO Reformat this to echo coordinates for confirmation
-                 // TODO make sure sending extra characters is fine.
+                 // TODO Remove echoing entirely, or at least comment out
                 len = sprintf(dataOut, "CoM: %d\tLV: %d\tRV: %d\r\n", rxVal,l_d_vel,r_d_vel);
                 i++;
                 USB_DEVICE_CDC_Write(USB_DEVICE_CDC_INDEX_0,
@@ -556,6 +555,7 @@ void APP_Tasks(void) {
                 rxPos = 0;
                 gotRx = 0;
             } else {
+                 //TODO Strip out this counting stuff
                 len = sprintf(dataOut, "%d\r\n", i);
                 i++;
                 USB_DEVICE_CDC_Write(USB_DEVICE_CDC_INDEX_0,
