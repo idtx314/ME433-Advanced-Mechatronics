@@ -475,7 +475,7 @@ void APP_Tasks(void) {
                         if(error<0) {
                             //slow left wheel
                             error = -error;
-                            l_d_vel = MAX_VEL - L_KP * error;
+                            l_d_vel = MAX_VEL; //- L_KP * error;
                             r_d_vel = MAX_VEL;
                             if (l_d_vel < MIN_VEL)
                                 l_d_vel = MIN_VEL;
@@ -483,7 +483,7 @@ void APP_Tasks(void) {
                         //if right
                         else {
                             //slow right wheel
-                            r_d_vel = MAX_VEL - R_KP * error;
+                            r_d_vel = MAX_VEL; //- R_KP * error;
                             l_d_vel = MAX_VEL;
                             if (r_d_vel < MIN_VEL)
                                 r_d_vel = MIN_VEL;
@@ -545,7 +545,7 @@ void APP_Tasks(void) {
             /* THIS IS WHERE YOU CAN READ YOUR IMU, PRINT TO THE LCD, ETC */
              if (gotRx) {
                  // TODO Remove echoing entirely, or at least comment out
-                len = sprintf(dataOut, "CoM: %d\tLV: %d\tRV: %d\r\n", rxVal,l_d_vel,r_d_vel);
+                len = sprintf(dataOut, "CoM: %d\tLV: %d\tRV: %d\tr_eint: %d\r\n", rxVal,l_d_vel,r_d_vel,_r_eint);
                 i++;
                 USB_DEVICE_CDC_Write(USB_DEVICE_CDC_INDEX_0,
                         &appData.writeTransferHandle,

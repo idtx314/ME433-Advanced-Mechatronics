@@ -68,10 +68,10 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #define MIN_PWM 0
 #define MAX_E_CAP 500
 #define MIN_E_CAP -500
-#define L_KP 1
-#define R_KP 1
-#define L_KI 1
-#define R_KI 1
+#define L_KP 1.
+#define R_KP 1.
+#define L_KI 0.1
+#define R_KI 0.05
 
 // *****************************************************************************
 // *****************************************************************************
@@ -120,6 +120,9 @@ void __ISR(_TIMER_4_VECTOR, IPL4SOFT) Timer4ISR(void){
         r_eint = MAX_E_CAP;
     else if(r_eint < MIN_E_CAP)
         r_eint = MIN_E_CAP;
+    
+    //Debug
+    _r_eint = r_eint;
 
         // Calculate desired PWM
     l_d_pwm = L_KP *l_error + L_KI *l_eint;
