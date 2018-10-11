@@ -89,30 +89,52 @@ void __ISR(_TIMER_4_VECTOR, IPL4SOFT) Timer4ISR(void){  //Runs at 500Hz
     // Local Variables
     static int l_prev_count = 0, r_prev_count = 0;
     static int l_eint = 0, r_eint=0;
-    int l_count, r_count, l_vel, r_vel, l_error, r_error, l_d_pwm, r_d_pwm;
+    int l_count, r_count, l_vel, r_vel, l_error, r_error, l_d_pwm, r_d_pwm, l_vel_sum=0, r_vel_sum=0;
+    int i;
+    double l_avg, r_avg;
 
 
     // Get encoder count
     l_count = TMR5;
     r_count = TMR3;
-
+    
     // Calculate average wheel speed since last interrupt
     // Multiply by large number instead of dividing by small
-    // TODO Measuring frequency is fast enough that rotation is often to slow to register, leading to extreme value changes
+    // TODO Measuring frequency is fast enough that rotation is often too slow to register, leading to extreme value changes
     l_vel = (l_count - l_prev_count) * 500;
     r_vel = (r_count - r_prev_count) * 500;
+    
+    // Update velocity histories
+    // Oldest reading first
+    for(i=0; i < (10-1); i++)
+    {
+        _l_velocity_history[i] = _l_velocity_history[i+1];
+        _r_velocity_history[i] = _r_velocity_history[i+1];
+    }
+    _l_velocity_history[9] = l_vel;
+    _r_velocity_history[9] = r_vel;
+    
+    // Use the last ten velocities to perform a moving average and take a more reasonable measure of the wheel velocity
+    for(i=0; i < 10; i++)
+    {
+        l_vel_sum = l_vel_sum + _l_velocity_history[i];
+        r_vel_sum = r_vel_sum + _r_velocity_history[i];
+    }
+    
+    l_avg = l_vel_sum/10.0;
+    r_avg = r_vel_sum/10.0;
 
 
     // Perform PI control
         // Calculate error
         // Negative if velocity too high, positive if too low
-    l_error = l_d_vel - l_vel; //50 - 0,500,1000
-    r_error = r_d_vel - r_vel;
+    l_error = l_d_vel - l_avg; // Debug: was 50 - 0,500,1000 before moving average filter
+    r_error = r_d_vel - r_avg;
 
         // Calculate integrated error
     l_eint += l_error;
     r_eint += r_error;
-            // Cap integrated error
+        // Cap integrated error
     if(l_eint > MAX_E_CAP)
         l_eint = MAX_E_CAP;
     else if(l_eint < MIN_E_CAP)
@@ -123,10 +145,11 @@ void __ISR(_TIMER_4_VECTOR, IPL4SOFT) Timer4ISR(void){  //Runs at 500Hz
         r_eint = MIN_E_CAP;
     
         // Calculate desired PWM
-    l_d_pwm = L_KP *l_error + L_KI *l_eint;
+    l_d_pwm = L_KP *l_error + L_KI * l_eint;
     r_d_pwm = R_KP *r_error + R_KI * r_eint;
-    //Debug Because of the poor speed resolution, I expect the numbers here to set the pwm to 50, then as soon as motion is registered
-    // set it back to 0 due to being too fast. Not sure whether to handle this through K values or try for higher accuracy speed
+    //Debug Because of the high read frequency compared to the wheel speed, I expect the numbers here to set the pwm to 50, 
+    // then as soon as motion is registered
+    // set it back to 0 due to being too fast. Could try using K values or reduce the read frequency?
 
         // Cap desired value to range
     if(l_d_pwm > MAX_PWM)
@@ -145,7 +168,7 @@ void __ISR(_TIMER_4_VECTOR, IPL4SOFT) Timer4ISR(void){  //Runs at 500Hz
 //    OC1RS = 2000;
 //    OC4RS = 2000;
 
-    // Debug
+    // Debug output data
     _l_global = r_error;
     _r_global = r_eint;
 
