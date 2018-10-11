@@ -85,7 +85,7 @@ void __ISR(_USB_1_VECTOR, ipl4AUTO) _IntHandlerUSBInstance0(void)
     DRV_USBFS_Tasks_ISR(sysObj.drvUSBObject);
 }
 
-void __ISR(_TIMER_4_VECTOR, IPL4SOFT) Timer4ISR(void){
+void __ISR(_TIMER_4_VECTOR, IPL4SOFT) Timer4ISR(void){  //Runs at 500Hz
     // Local Variables
     static int l_prev_count = 0, r_prev_count = 0;
     static int l_eint = 0, r_eint=0;
@@ -97,7 +97,8 @@ void __ISR(_TIMER_4_VECTOR, IPL4SOFT) Timer4ISR(void){
     r_count = TMR3;
 
     // Calculate average wheel speed since last interrupt
-    //Multiply by large number instead of dividing by small
+    // Multiply by large number instead of dividing by small
+    // TODO Measuring frequency is fast enough that rotation is often to slow to register, leading to extreme value changes
     l_vel = (l_count - l_prev_count) * 500;
     r_vel = (r_count - r_prev_count) * 500;
 
@@ -105,7 +106,7 @@ void __ISR(_TIMER_4_VECTOR, IPL4SOFT) Timer4ISR(void){
     // Perform PI control
         // Calculate error
         // Negative if velocity too high, positive if too low
-    l_error = l_d_vel - l_vel;
+    l_error = l_d_vel - l_vel; //50 - 0,500,1000
     r_error = r_d_vel - r_vel;
 
         // Calculate integrated error
@@ -121,12 +122,11 @@ void __ISR(_TIMER_4_VECTOR, IPL4SOFT) Timer4ISR(void){
     else if(r_eint < MIN_E_CAP)
         r_eint = MIN_E_CAP;
     
-    //Debug
-    _r_eint = r_eint;
-
         // Calculate desired PWM
     l_d_pwm = L_KP *l_error + L_KI *l_eint;
     r_d_pwm = R_KP *r_error + R_KI * r_eint;
+    //Debug Because of the poor speed resolution, I expect the numbers here to set the pwm to 50, then as soon as motion is registered
+    // set it back to 0 due to being too fast. Not sure whether to handle this through K values or try for higher accuracy speed
 
         // Cap desired value to range
     if(l_d_pwm > MAX_PWM)
@@ -145,6 +145,9 @@ void __ISR(_TIMER_4_VECTOR, IPL4SOFT) Timer4ISR(void){
 //    OC1RS = 2000;
 //    OC4RS = 2000;
 
+    // Debug
+    _l_global = r_error;
+    _r_global = r_eint;
 
 
     // Save the new counts

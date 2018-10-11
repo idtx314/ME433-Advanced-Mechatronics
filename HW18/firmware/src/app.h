@@ -86,7 +86,7 @@ extern "C" {
     
 int l_d_vel=0, r_d_vel=0;     // Desired velocities
 //Debug
-int _r_eint;
+int _r_global=0, _l_global=0;
 
 typedef enum
 {

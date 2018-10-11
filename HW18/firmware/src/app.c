@@ -472,6 +472,7 @@ void APP_Tasks(void) {
                         int error = rxVal - 240;        //Determine how far from center CoM is
                         
                         //If left
+                        //Debug commented out error modifications
                         if(error<0) {
                             //slow left wheel
                             error = -error;
@@ -545,7 +546,7 @@ void APP_Tasks(void) {
             /* THIS IS WHERE YOU CAN READ YOUR IMU, PRINT TO THE LCD, ETC */
              if (gotRx) {
                  // TODO Remove echoing entirely, or at least comment out
-                len = sprintf(dataOut, "CoM: %d\tLV: %d\tRV: %d\tr_eint: %d\r\n", rxVal,l_d_vel,r_d_vel,_r_eint);
+                len = sprintf(dataOut, "l_value: %d\tr_value: %d\r\n", _l_global,_r_global);
                 i++;
                 USB_DEVICE_CDC_Write(USB_DEVICE_CDC_INDEX_0,
                         &appData.writeTransferHandle,
@@ -556,7 +557,7 @@ void APP_Tasks(void) {
                 gotRx = 0;
             } else {
                  //TODO Strip out this counting stuff
-                len = sprintf(dataOut, "%d\r\n", i);
+                len = sprintf(dataOut, "l_value: %d\tr_value: %d\r\n", _l_global,_r_global);
                 i++;
                 USB_DEVICE_CDC_Write(USB_DEVICE_CDC_INDEX_0,
                         &appData.writeTransferHandle, dataOut, len,
