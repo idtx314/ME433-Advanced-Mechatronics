@@ -121,6 +121,7 @@ void __ISR(_TIMER_4_VECTOR, IPL4SOFT) Timer4ISR(void){  //Runs at 500Hz
         r_vel_sum = r_vel_sum + _r_velocity_history[i];
     }
     
+    // TODO should I be using a double here?
     l_avg = l_vel_sum/10.0;
     r_avg = r_vel_sum/10.0;
 
