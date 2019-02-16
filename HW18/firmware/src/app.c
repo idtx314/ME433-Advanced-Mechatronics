@@ -469,10 +469,10 @@ void APP_Tasks(void) {
                         gotRx = 1; // set the flag
                         
                         //Perform CoM Calculation
-                        int error = rxVal - 240;        //Determine how far from center CoM is
+                        int error = rxVal - 240;        //Determine how far from center of image the CoM is
                         
                         //If left
-                        //Debug commented out error modifications
+                        //TODO commented out error modifications
                         if(error<0) {
                             //slow left wheel
                             error = -error;
@@ -552,7 +552,7 @@ void APP_Tasks(void) {
                         &appData.writeTransferHandle,
                         dataOut, len,
                         USB_DEVICE_CDC_TRANSFER_FLAGS_DATA_COMPLETE);
-                //TODO Move this to the receive completion statement
+                //TODO Move this to the receive completion statement after disabling echoing. This if statement won't be needed.
                 rxPos = 0;
                 gotRx = 0;
             } else {

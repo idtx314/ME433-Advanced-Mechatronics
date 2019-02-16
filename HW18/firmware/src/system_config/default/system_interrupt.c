@@ -100,7 +100,7 @@ void __ISR(_TIMER_4_VECTOR, IPL4SOFT) Timer4ISR(void){  //Runs at 500Hz
     
     // Calculate average wheel speed since last interrupt
     // Multiply by large number instead of dividing by small
-    // TODO Measuring frequency is fast enough that rotation is often too slow to register, leading to extreme value changes
+    // Measuring frequency is fast enough that rotation is often too slow to register, leading to extreme value changes
     l_vel = (l_count - l_prev_count) * 500;
     r_vel = (r_count - r_prev_count) * 500;
     
@@ -114,7 +114,7 @@ void __ISR(_TIMER_4_VECTOR, IPL4SOFT) Timer4ISR(void){  //Runs at 500Hz
     _l_velocity_history[9] = l_vel;
     _r_velocity_history[9] = r_vel;
     
-    // Use the last ten velocities to perform a moving average and take a more reasonable measure of the wheel velocity
+    // Use the last ten velocities to perform a moving average and compensate for the extreme value changes
     for(i=0; i < 10; i++)
     {
         l_vel_sum = l_vel_sum + _l_velocity_history[i];
@@ -129,7 +129,7 @@ void __ISR(_TIMER_4_VECTOR, IPL4SOFT) Timer4ISR(void){  //Runs at 500Hz
     // Perform PI control
         // Calculate error
         // Negative if velocity too high, positive if too low
-    l_error = l_d_vel - l_avg; // Debug: was 50 - 0,500,1000 before moving average filter
+    l_error = l_d_vel - l_avg; // TODO: This was always 50 - 0,500,1000 before moving average filter
     r_error = r_d_vel - r_avg;
 
         // Calculate integrated error
@@ -148,9 +148,9 @@ void __ISR(_TIMER_4_VECTOR, IPL4SOFT) Timer4ISR(void){  //Runs at 500Hz
         // Calculate desired PWM
     l_d_pwm = L_KP *l_error + L_KI * l_eint;
     r_d_pwm = R_KP *r_error + R_KI * r_eint;
-    //Debug Because of the high read frequency compared to the wheel speed, I expect the numbers here to set the pwm to 50, 
-    // then as soon as motion is registered
-    // set it back to 0 due to being too fast. Could try using K values or reduce the read frequency?
+    //TODO Because of the high read frequency compared to the wheel speed, I expect the numbers here to set the pwm to 50, 
+    // then as soon as motion is registered set it back to 0 due to being too fast. 
+    // The moving average filter will hopefully address this issue
 
         // Cap desired value to range
     if(l_d_pwm > MAX_PWM)
@@ -169,7 +169,7 @@ void __ISR(_TIMER_4_VECTOR, IPL4SOFT) Timer4ISR(void){  //Runs at 500Hz
 //    OC1RS = 2000;
 //    OC4RS = 2000;
 
-    // Debug output data
+    // TODO this is debug output data
     _l_global = r_error;
     _r_global = r_eint;
 

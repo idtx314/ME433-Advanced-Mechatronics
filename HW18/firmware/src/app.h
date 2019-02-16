@@ -86,7 +86,7 @@ extern "C" {
     
 int l_d_vel=0, r_d_vel=0;     // Desired velocities
 int _l_velocity_history[10] = {0,0,0,0,0,0,0,0,0,0}, _r_velocity_history[10] = {0,0,0,0,0,0,0,0,0,0};
-//Debug variables
+//TODO: these are debug variables
 int _r_global=0, _l_global=0;
 
 
